@@ -1,0 +1,147 @@
+_id,link,website,request_time,request_date,request_datetime,flat_meta.price,flat_meta.rooms,flat_meta.surface,flat_meta.title,city,order,stage
+ObjectID(58402a9479baba5e57027850),www.immobilienscout24.de/expose/88896099,immobilienscout,18:50:20,2016-06-13,2016-06-13T18:50:20Z,398,300,59,"Zuschnappen! 3 Raumwohnung, Tageslichtbad, Balkon, EBK, WG-geeignet, super Gru",leipzig,NA,4
+ObjectID(58402aef79baba5e570278ce),www.immobilienscout24.de/expose/88599431,immobilienscout,07:21:39,2016-06-14,2016-06-14T07:21:39Z,498.75,200,57.15,Hell und renoviert ? ruhig und zentral: 2-Zimmer-Wohnung in Köln-Kalk,köln,NA,4
+ObjectID(58402c1779baba5e57027a5a),www.immobilienscout24.de/expose/88955863,immobilienscout,07:48:55,2016-06-17,2016-06-17T07:48:55Z,342,300,60,"Laminat, Tageslichtbad, Balkon, perfekt für kleine Familie",leipzig,NA,4
+ObjectID(58402e0e79baba5e57027d58),www.immobilienscout24.de/expose/89022833,immobilienscout,17:12:31,2016-06-21,2016-06-21T17:12:31Z,550,250,55,2 1/2 Wohnung,hamburg,NA,1
+ObjectID(58402e0f79baba5e57027d5a),www.immobilienscout24.de/expose/89021280,immobilienscout,17:12:27,2016-06-21,2016-06-21T17:12:27Z,585,200,45,Klein aber Fein! 45 qm Maisonett-Whg im schönen Teil von Stellingen nahe an Ei,hamburg,NA,1
+ObjectID(58402e1179baba5e57027d60),www.immobilienscout24.de/expose/89015931,immobilienscout,17:12:44,2016-06-21,2016-06-21T17:12:44Z,357,300,59.4,* 3-Raum-Wohnung * EBK * Laminat * Leipzig Gohlis-Nord *,leipzig,NA,1
+ObjectID(58402e1379baba5e57027d68),www.immobilienscout24.de/expose/89015366,immobilienscout,17:14:37,2016-06-21,2016-06-21T17:14:37Z,450,100,33,1-Zimmer-Wohnung OHNE PROVISION zu vermieten,münchen,NA,1
+ObjectID(58402e1479baba5e57027d6c),www.immobilienscout24.de/expose/89020639,immobilienscout,17:20:12,2016-06-21,2016-06-21T17:20:12Z,330,200,53.01,2-Zimmer Wohnung in Böhlitz-Ehrenberg,leipzig,NA,1
+ObjectID(58402e1579baba5e57027d6e),www.immobilienscout24.de/expose/89020124,immobilienscout,17:14:12,2016-06-21,2016-06-21T17:14:12Z,370,200,39,Singlewohnung,köln,NA,1
+ObjectID(5840322c79baba5e57028328),www.immobilienscout24.de/expose/88537219,immobilienscout,07:57:47,2016-07-02,2016-07-02T07:57:47Z,550,200,52,TOP 2 ZIMMER WOHNUNG!,münchen,NA,2
+ObjectID(5840327479baba5e57028376),www.immobilienscout24.de/expose/89188307,immobilienscout,17:12:38,2016-07-02,2016-07-02T17:12:38Z,325,200,59,Wohnung mit EBK*Balkon*Lift*Nahe Karl-Heine-Str.,leipzig,NA,4
+ObjectID(584032e179baba5e570283e8),www.immobilienscout24.de/expose/88382752,immobilienscout,17:09:53,2016-07-03,2016-07-03T17:09:53Z,352,100,31.5,Frisch sanierte 1.Zimmerwohnung mit Küche (Video),berlin,NA,4
+ObjectID(5840334a79baba5e57028468),www.immobilienscout24.de/expose/89208000,immobilienscout,17:12:55,2016-07-04,2016-07-04T17:12:55Z,260,200,41.63,niedliche Single-Wohnung mit Loggia,leipzig,NA,4
+ObjectID(5840343d79baba5e5702858c),www.immobilienscout24.de/expose/89233334,immobilienscout,07:51:57,2016-07-06,2016-07-06T07:51:57Z,310,200,55.51,Geräumig Helle Wohnung * Super Grundriss * Laminat * Sehr Gute Verkehrsanbindu,leipzig,NA,4
+ObjectID(5840355c79baba5e57028710),www.immobilienscout24.de/expose/89282816,immobilienscout,17:15:22,2016-07-08,2016-07-08T17:15:22Z,450,200,58,Tolle Wohnung mitten in der Neustadt mit Balkon !!!,dresden,NA,4
+ObjectID(5840356479baba5e57028730),www.immobilienscout24.de/expose/89281232,immobilienscout,16:40:40,2016-07-08,2016-07-08T16:40:40Z,347,200,53.47,Zur Angebotsübersicht Tolle Wohnung mit Fußbodenheizung Lift und Erker in Inne,dresden,NA,4
+ObjectID(5840356679baba5e57028736),www.immobilienscout24.de/expose/89282930,immobilienscout,16:40:58,2016-07-08,2016-07-08T16:40:58Z,367,200,50.3,Top Singlewohnung in Pieschen mit Einbauküche!!!,dresden,NA,4
+ObjectID(584035e779baba5e570287a2),www.immobilienscout24.de/expose/89286942,immobilienscout,17:11:50,2016-07-09,2016-07-09T17:11:50Z,247,200,45,Liebevoll sanierte 2-R-Whg. mit Süd/West-Balkon bei Park im schönen Coppistraß,leipzig,NA,4
+ObjectID(584036af79baba5e57028892),www.immobilienscout24.de/expose/89326390,immobilienscout,07:58:07,2016-07-12,2016-07-12T07:58:07Z,590,200,45,Schöne 2 Zimmer-Wohnung in Moosach ab sofort,münchen,NA,1
+ObjectID(584036af79baba5e57028894),www.immobilienscout24.de/expose/83421852,immobilienscout,07:51:36,2016-07-12,2016-07-12T07:51:36Z,520,100,38,"Möbliertes Studio in der West-City Berlin zur Untermiete, September 2016 bis M",berlin,NA,1
+ObjectID(584036b879baba5e570288ae),www.immobilienscout24.de/expose/72736880,immobilienscout,07:52:28,2016-07-12,2016-07-12T07:52:28Z,303,200,48.87,Wunderschöne 2-R-W im Dunckerviertel - ruhig und grün gelegen,leipzig,NA,1
+ObjectID(584038b679baba5e57028ac4),www.immobilienscout24.de/expose/53584118,immobilienscout,17:11:53,2016-07-15,2016-07-15T17:11:53Z,330,200,55,"gemütliche 2-Raum-Wohnung in der Herderstraße 11, Hochpaterre, ruhige Hoflage",magdeburg,NA,4
+ObjectID(58404ad479baba5e57028bfa),www.immowelt.de/expose/2ASKB48,immowelt,09:24:43,2016-06-13,2016-06-13T09:24:43Z,360,NA,57,"2ZKB Balkon, ruhige Stadtrandlage, TG- Stellplatz",leipzig,NA,4
+ObjectID(58404ae379baba5e57028c30),www.immowelt.de/expose/2A2MB48,immowelt,09:26:45,2016-06-13,2016-06-13T09:26:45Z,225,NA,42,1 ZKB mit Wohnküche und Parkettfußboden,leipzig,NA,4
+ObjectID(58404b2c79baba5e57028c7a),www.immowelt.de/expose/29CHJ4E,immowelt,18:57:40,2016-06-13,2016-06-13T18:57:40Z,489.63,NA,51.54,1-Zimmer Wohnung 51m² - Erstbezug nach Sanierung,berlin,NA,4
+ObjectID(58404bc679baba5e57028d20),www.immowelt.de/expose/2ALU749,immowelt,07:33:12,2016-06-15,2016-06-15T07:33:12Z,244.86,NA,42,1 ZKB mit Wohnküche und Parkettfußboden,leipzig,NA,4
+ObjectID(58404bce79baba5e57028d2a),www.immowelt.de/expose/2AWQ749,immowelt,07:19:52,2016-06-15,2016-06-15T07:19:52Z,360,NA,57,"2ZKB Balkon, ruhige Stadtrandlage, TG- Stellplatz",leipzig,NA,4
+ObjectID(58404c4579baba5e57028dc4),www.immowelt.de/expose/2AP4X49,immowelt,07:50:12,2016-06-17,2016-06-17T07:50:12Z,342,NA,60,"Laminat, Tageslichtbad, Balkon, perfekt für kleine Familie",leipzig,NA,4
+ObjectID(58404c7b79baba5e57028dc6),www.immowelt.de/expose/2AR9C4A,immowelt,17:06:13,2016-06-17,2016-06-17T17:06:13Z,342,NA,60,"Laminat, Tageslichtbad, Balkon, perfekt für kleine Familie",leipzig,NA,4
+ObjectID(58404c7d79baba5e57028dca),www.immowelt.de/expose/2AT2C4A,immowelt,17:06:13,2016-06-17,2016-06-17T17:06:13Z,315,NA,49.69,"Dachgeschoss, Einbauküche, Duschbad, super Verkehrsanbindung",leipzig,NA,4
+ObjectID(58404c8379baba5e57028de4),www.immowelt.de/expose/2A89C4A,immowelt,17:07:39,2016-06-17,2016-06-17T17:07:39Z,290,NA,41.23,"Zuschnappen!  Bad mit Wanne, Laminat, EBK möglich, super Grundriss",leipzig,NA,4
+ObjectID(58404c8779baba5e57028dee),www.immowelt.de/expose/2AZ8C4A,immowelt,17:07:50,2016-06-17,2016-06-17T17:07:50Z,360,NA,56.93,Komplett modernisiert !!!! ERSTBEZUG,leipzig,NA,4
+ObjectID(58404cd779baba5e57028e30),www.immowelt.de/expose/2ATBN4A,immowelt,17:01:42,2016-06-18,2016-06-18T17:01:42Z,330,NA,57,"2ZKB Balkon, Tiefgarage, ruhige Lage",leipzig,NA,4
+ObjectID(58404d8e79baba5e57028f1e),www.immowelt.de/expose/2AR2H4B,immowelt,17:11:52,2016-06-21,2016-06-21T17:11:52Z,390,NA,39,"| NEUES BADEZIMMER | 2-Zimmer auf fast 40qm, ruhig gelegen",nürnberg,NA,1
+ObjectID(58404d8f79baba5e57028f24),www.immowelt.de/expose/2A2KJ4B,immowelt,17:12:08,2016-06-21,2016-06-21T17:12:08Z,265,NA,49,49qm Nordstadt,dortmund,NA,4
+ObjectID(58404d9879baba5e57028f46),www.immowelt.de/expose/2A2UE4B,immowelt,17:14:55,2016-06-21,2016-06-21T17:14:55Z,280,NA,54,Sehr schöne 2 Zimmer Wohnung in Magdeburg/Sudenburg,magdeburg,NA,1
+ObjectID(58404d9979baba5e57028f48),www.immowelt.de/expose/2ARDH4B,immowelt,17:13:17,2016-06-21,2016-06-21T17:13:17Z,375,NA,38,zentrale 2 Zi. Wohnung in HH-Harburg,hamburg,NA,1
+ObjectID(58404d9a79baba5e57028f4a),www.immowelt.de/expose/2ANTE4B,immowelt,17:12:26,2016-06-21,2016-06-21T17:12:26Z,240,NA,42,Sehr schöne 2- Zimmerwohnung im Erdgeschoss mit Balkon,magdeburg,NA,1
+ObjectID(58404d9c79baba5e57028f4c),www.immowelt.de/expose/2AF6K4B,immowelt,17:13:55,2016-06-21,2016-06-21T17:13:55Z,386,NA,48.5,Gemütliche kleine Wohnung ideal für Singles mit EBK,dresden,NA,1
+ObjectID(58404d9d79baba5e57028f4e),www.immowelt.de/expose/2ADJ84B,immowelt,17:14:17,2016-06-21,2016-06-21T17:14:17Z,350,NA,52,2 ZW Nürnberg,nürnberg,NA,1
+ObjectID(58404d9e79baba5e57028f50),www.immowelt.de/expose/2AHDK4B,immowelt,17:14:39,2016-06-21,2016-06-21T17:14:39Z,320,NA,48,"SCHÖNE 2,5 ZIMMER-CITYWOHNUNG IN FH-NÄHE ZU VERMIETEN",dortmund,NA,1
+ObjectID(58404de579baba5e57028fb0),www.immowelt.de/expose/2ATTX4B,immowelt,17:28:14,2016-06-22,2016-06-22T17:28:14Z,380,NA,40,Liebe auf den ersten Blick!,nürnberg,NA,1
+ObjectID(58404ebe79baba5e57029074),www.immowelt.de/expose/2APCS4C,immowelt,17:05:50,2016-06-24,2016-06-24T17:05:50Z,290,NA,45.2,"Tolle Wohnung, verkehrszentral, Laminat, Tageslichtbad mit Dusche, EBK möglich",leipzig,NA,4
+ObjectID(58404ebf79baba5e57029076),www.immowelt.de/expose/2A8BS4C,immowelt,17:05:51,2016-06-24,2016-06-24T17:05:51Z,295,NA,55.63,"Balkon, Tageslichtbad, Garten",leipzig,NA,4
+ObjectID(58404ec179baba5e5702907e),www.immowelt.de/expose/2AP7S4C,immowelt,17:06:07,2016-06-24,2016-06-24T17:06:07Z,340,NA,45,Geräumige 1-Zimmer Wohnung in der Rosenau.,nürnberg,NA,4
+ObjectID(58404ec579baba5e5702908c),www.immowelt.de/expose/2AFDS4C,immowelt,17:07:18,2016-06-24,2016-06-24T17:07:18Z,398,NA,59,"Zuschnappen! 3 Raumwohnung, Tageslichtbad, Balkon, EBK, WG-geeignet, super Grundriss",leipzig,NA,4
+ObjectID(58404ec679baba5e57029090),www.immowelt.de/expose/2AKCS4C,immowelt,17:07:21,2016-06-24,2016-06-24T17:07:21Z,330,NA,47.6,"Ruhiges Wohnen! Laminat, Bad mit Dusche EBK möglich",leipzig,NA,4
+ObjectID(58404f1179baba5e570290f8),www.immowelt.de/expose/2AA2A4D,immowelt,07:59:41,2016-06-27,2016-06-27T07:59:41Z,244.86,NA,42,1 ZKB mit Wohnküche incl. EBK,leipzig,NA,4
+ObjectID(58404f1779baba5e57029112),www.immowelt.de/expose/2AXZ94D,immowelt,08:00:50,2016-06-27,2016-06-27T08:00:50Z,225,NA,42,1 ZKB mit Wohnküche und Parkettfußboden,leipzig,NA,4
+ObjectID(58404f7679baba5e57029176),www.immowelt.de/expose/2AS5V4D,immowelt,07:53:18,2016-06-28,2016-06-28T07:53:18Z,400,NA,31,"Gemütliche 1 Zi-Whg, Frankfurt-Berkersheim",frankfurt,NA,2
+ObjectID(58404fcd79baba5e570291b8),www.immowelt.de/expose/2AL5S4E,immowelt,07:48:36,2016-06-29,2016-06-29T07:48:36Z,330,NA,57,"2ZKB Balkon, Tiefgarage, ruhige Lage",leipzig,NA,4
+ObjectID(58404fda79baba5e570291e2),www.immowelt.de/expose/2AY6S4E,immowelt,07:50:51,2016-06-29,2016-06-29T07:50:51Z,244.86,NA,42,1 ZKB mit Wohnküche incl. EBK,leipzig,NA,4
+ObjectID(5840514b79baba5e57029332),www.immowelt.de/expose/2AW7J4G,immowelt,17:10:31,2016-07-02,2016-07-02T17:10:31Z,387.79,NA,59.66,** Erstbezug ** Tolle Wohnung in Leipzig-Neuschönefeld sucht einen Mieter,leipzig,NA,4
+ObjectID(5840514f79baba5e57029344),www.immowelt.de/expose/2ABBJ4G,immowelt,17:11:25,2016-07-02,2016-07-02T17:11:25Z,290,NA,41.23,"Zuschnappen!  Bad mit Wanne, Laminat, EBK möglich, super Grundriss",leipzig,NA,4
+ObjectID(5840515779baba5e5702935c),www.immowelt.de/expose/2AW6J4G,immowelt,17:12:25,2016-07-02,2016-07-02T17:12:25Z,315,NA,49.69,"Dachgeschoss, Einbauküche, Duschbad, super Verkehrsanbindung",leipzig,NA,4
+ObjectID(5840515a79baba5e57029368),www.immowelt.de/expose/2AY7J4G,immowelt,17:12:50,2016-07-02,2016-07-02T17:12:50Z,390,NA,59.91,"Hochpaterre, Bad mit Wanne und Dusche, Laminat, Balkon",leipzig,NA,4
+ObjectID(584052c779baba5e570294c2),www.immowelt.de/expose/2AB7D4J,immowelt,17:17:06,2016-07-06,2016-07-06T17:17:06Z,288,NA,54.25,RUHIGES WOHNEN mitten im Grünen*sonniger Balkon*Laminat,leipzig,NA,4
+ObjectID(5840539879baba5e5702959a),www.immowelt.de/expose/2AAJ54K,immowelt,17:15:45,2016-07-08,2016-07-08T17:15:45Z,210,NA,33.48,"Sofort Bezugsfertig! Wohnung mit Terrasse, Erdgeschoss,Bad mit Wanne,offene Küche,TG",leipzig,NA,4
+ObjectID(584053c979baba5e570295d0),www.immowelt.de/expose/2AMFG4K,immowelt,07:50:56,2016-07-09,2016-07-09T07:50:56Z,360,NA,56.93,Komplett modernisiert !!!! ERSTBEZUG,leipzig,NA,4
+ObjectID(584053cd79baba5e570295dc),www.immowelt.de/expose/2AJGG4K,immowelt,07:51:38,2016-07-09,2016-07-09T07:51:38Z,305,NA,43.56,Single-Wohnung mit Loggia,leipzig,NA,4
+ObjectID(584053cf79baba5e570295e2),www.immowelt.de/expose/2A5GG4K,immowelt,07:51:49,2016-07-09,2016-07-09T07:51:49Z,398,NA,59,"Zuschnappen! 3 Raumwohnung, Tageslichtbad, Balkon, EBK, WG-geeignet, super Grundriss",leipzig,NA,4
+ObjectID(584053da79baba5e57029608),www.immowelt.de/expose/2AZFG4K,immowelt,07:52:03,2016-07-09,2016-07-09T07:52:03Z,235,NA,48,Gemütliche Maisonette-Wohnung - ideal für Singles,leipzig,NA,4
+ObjectID(5840547179baba5e570296b0),www.immowelt.de/expose/2A96E4L,immowelt,07:52:05,2016-07-12,2016-07-12T07:52:05Z,399.89,NA,55.54,"Castellum* ERSTBEZUG mit Fußbodenheizung, Loggia und hochwertiger Ausstattung",leipzig,NA,1
+ObjectID(5840547779baba5e570296c2),www.immowelt.de/expose/2AMXA4L,immowelt,07:50:49,2016-07-12,2016-07-12T07:50:49Z,374,NA,53,"Tolle Wohnung in Innenstadtnähe mit Glaserker, Rollläden , Fußbodenheizung und Fahrstuhl !!!!",dresden,NA,4
+ObjectID(584054db79baba5e57029728),www.immowelt.de/expose/2AZXS4L,immowelt,07:52:53,2016-07-13,2016-07-13T07:52:53Z,320,NA,52,"2ZKB großer hofseitiger Balkon, EBK, Laminat, Tiefgarage",leipzig,NA,4
+ObjectID(584054de79baba5e57029732),www.immowelt.de/expose/2ADVS4L,immowelt,07:53:17,2016-07-13,2016-07-13T07:53:17Z,330,NA,57,"2ZKB Balkon, Tiefgarage, ruhige Lage",leipzig,NA,4
+ObjectID(584054e079baba5e57029738),www.immowelt.de/expose/2ASVS4L,immowelt,07:53:35,2016-07-13,2016-07-13T07:53:35Z,295,NA,59,"2ZKB Parkett, EBK, WG- geeignet",leipzig,NA,4
+ObjectID(584055a279baba5e5702984e),www.immowelt.de/expose/2AUJW4M,immowelt,17:13:32,2016-07-15,2016-07-15T17:13:32Z,245.15,NA,41.41,"ruhig, Tageslichtbad",leipzig,NA,4
+ObjectID(58469e2c79baba5e5702a1de),www.immobilienscout24.de/expose/90451289,immobilienscout,07:22:29,2016-09-24,2016-09-24T07:22:29Z,353,200,49.12,"Hallo Studenten, noch auf WE-Suche? 2-RWE mit EBK erwartet Euch",dresden,NA,4
+ObjectID(58469e7279baba5e5702a22c),www.immobilienscout24.de/expose/90453753,immobilienscout,17:28:16,2016-09-24,2016-09-24T17:28:16Z,249,200,38.48,"Laminat, Bad mit Dusche, Balkon, Stellplatz",leipzig,NA,4
+ObjectID(5846a09879baba5e5702a512),www.immobilienscout24.de/expose/69779303,immobilienscout,17:25:03,2016-09-30,2016-09-30T17:25:03Z,240,150,37,Wohnen auf dem Berge,dresden,NA,4
+ObjectID(584ebd91c980817b111fb87c),www.immowelt.de/expose/2BYTJ4E,immowelt,07:30:04,2016-09-20,2016-09-20T07:30:04Z,275,NA,43.07,"Tolle Wohnung, verkehrszentral, Laminat, Tageslichtbad mit Dusche, EBK möglich",leipzig,NA,4
+ObjectID(584ebdb2c980817b111fb887),www.immowelt.de/expose/2BJNY4E,immowelt,17:31:24,2016-09-20,2016-09-20T17:31:24Z,269,NA,35.59,Zentrumsnah Wohnen/1 Zimmer/Parkett/Einbauküche,leipzig,NA,4
+ObjectID(584ebe0dc980817b111fb8d6),www.immowelt.de/expose/2BK6K4F,immowelt,07:28:25,2016-09-22,2016-09-22T07:28:25Z,240,NA,33.5,* 1 Zi. Apartment für Studenten im Osten von Leipzig - nicht weit vom Zentrum entfernt,leipzig,NA,4
+ObjectID(584ebe63c980817b111fb90c),www.immowelt.de/expose/2BM844G,immowelt,07:26:40,2016-09-23,2016-09-23T07:26:40Z,250,NA,43,2ZKB  hofseitiges Schlafzimmer,leipzig,NA,4
+ObjectID(584ebe8fc980817b111fb922),www.immowelt.de/expose/2BUYD4G,immowelt,17:24:05,2016-09-23,2016-09-23T17:24:05Z,305,NA,43.56,Single-Wohnung mit Loggia,leipzig,NA,4
+ObjectID(584ebe8fc980817b111fb923),www.immowelt.de/expose/2BRXD4G,immowelt,17:24:04,2016-09-23,2016-09-23T17:24:04Z,360,NA,49.84,"Ruhiges Wohnen! Nussbaumlaminat, Bad mit Wanne, EBK möglich",leipzig,NA,4
+ObjectID(584ebe91c980817b111fb928),www.immowelt.de/expose/2BCRD4G,immowelt,17:24:46,2016-09-23,2016-09-23T17:24:46Z,315,NA,49.69,"Dachgeschoss, Einbauküche, Duschbad, super Verkehrsanbindung",leipzig,NA,4
+ObjectID(584ebe92c980817b111fb929),www.immowelt.de/expose/2BMTD4G,immowelt,17:24:48,2016-09-23,2016-09-23T17:24:48Z,350,NA,53.65,sonnige Wohnung mit Balkon/Bad mit Fenster/EBK/Laminat/gepflegter Altbau/ruhige Lage,leipzig,NA,4
+ObjectID(584ebef8c980817b111fb973),www.immowelt.de/expose/2B83T4G,immowelt,17:23:14,2016-09-24,2016-09-24T17:23:14Z,249,NA,38.48,"Laminat, Bad mit Dusche, Balkon, Stellplatz",leipzig,NA,4
+ObjectID(584ebf14c980817b111fb97d),www.immowelt.de/expose/2BALV4G,immowelt,07:25:32,2016-09-25,2016-09-25T07:25:32Z,328,NA,50.36,Sanierung läuft im ruhigen Erdgeschoss,leipzig,NA,4
+ObjectID(584ebf3dc980817b111fb99a),www.immowelt.de/expose/2BL9Y4G,immowelt,07:24:12,2016-09-26,2016-09-26T07:24:12Z,210,NA,33.48,"Sofort Bezugsfertig! Wohnung mit Terrasse, Erdgeschoss,Bad mit Wanne,offene Küche,TG",leipzig,NA,4
+ObjectID(584ebf80c980817b111fb9d7),www.immowelt.de/expose/2BLK84H,immowelt,07:25:13,2016-09-27,2016-09-27T07:25:13Z,249,NA,38.48,"Laminat, Bad mit Dusche, Balkon, Stellplatz",leipzig,NA,4
+ObjectID(584ec04ec980817b111fba61),www.immowelt.de/expose/2B2S64K,immowelt,17:25:16,2016-09-30,2016-09-30T17:25:16Z,350,NA,53.65,sonnige Wohnung mit Balkon/Bad mit Fenster/EBK/Laminat/gepflegter Altbau/ruhige Lage,leipzig,NA,4
+ObjectID(584ec04fc980817b111fba63),www.immowelt.de/expose/2BNN64K,immowelt,17:25:28,2016-09-30,2016-09-30T17:25:28Z,249,NA,38.48,"Laminat, Bad mit Dusche, Balkon, Stellplatz",leipzig,NA,4
+ObjectID(584ec175c980817b111fbb38),www.immowelt.de/expose/2BDUL4M,immowelt,17:27:26,2016-10-07,2016-10-07T17:27:26Z,313,NA,50.79,"Laminat, Balkon, perfekt für Paare oder Singles",leipzig,NA,4
+ObjectID(584ec17ac980817b111fbb44),www.immowelt.de/expose/2BYZL4M,immowelt,17:28:47,2016-10-07,2016-10-07T17:28:47Z,310,NA,55.51,Geräumig Helle Wohnung * Super Grundriss * Laminat * Sehr Gute Verkehrsanbindung*,leipzig,NA,4
+ObjectID(584ffc2dc980817b111fd018),www.immowelt.de/expose/2B5G74A,immowelt,08:01:54,2016-09-08,2016-09-08T08:01:54Z,345,NA,42.79,ERSTBEZUG nach Sanierung ! Denkmalgeschützter Altbau mit moderner Ausstattung,leipzig,NA,1
+ObjectID(584ffc2dc980817b111fd019),www.immowelt.de/expose/2B9FZ49,immowelt,08:01:54,2016-09-08,2016-09-08T08:01:54Z,292,NA,51.24,Senioren aufgepasst! 2 Zimmer im Hochparterre!,leipzig,NA,1
+ObjectID(584ffc2ec980817b111fd01a),www.immowelt.de/expose/2B3N44A,immowelt,08:01:51,2016-09-08,2016-09-08T08:01:51Z,850,NA,54,Sehr Ruhige 2-Zimmer-Wohnung am Sendling/Westpark U6,münchen,NA,1
+ObjectID(584ffc2ec980817b111fd01b),www.immowelt.de/expose/2BX564A,immowelt,08:01:51,2016-09-08,2016-09-08T08:01:51Z,420,NA,52,schöne helle 2 Zimmerwohnung,nürnberg,NA,1
+ObjectID(584ffc2fc980817b111fd01c),www.immowelt.de/expose/2BA744A,immowelt,08:01:53,2016-09-08,2016-09-08T08:01:53Z,350,NA,38,Möbliertes 1 Zimmer wohnung.,frankfurt,NA,1
+ObjectID(584ffc2fc980817b111fd01d),www.immowelt.de/expose/2BVHV49,immowelt,08:01:55,2016-09-08,2016-09-08T08:01:55Z,380,NA,58.68,Helle 2-Zimmerwohnung,nürnberg,NA,1
+ObjectID(584ffc30c980817b111fd01e),www.immowelt.de/expose/2BS744A,immowelt,08:02:08,2016-09-08,2016-09-08T08:02:08Z,350,NA,38,Möbliertes 1 Zimmer wohnung.,nürnberg,NA,1
+ObjectID(584ffc30c980817b111fd01f),www.immowelt.de/expose/2BU644A,immowelt,08:02:11,2016-09-08,2016-09-08T08:02:11Z,350,NA,38,Möbliertes 1 Zimmer wohnung.,berlin,NA,1
+ObjectID(584ffc31c980817b111fd020),www.immowelt.de/expose/2BMF74A,immowelt,08:02:12,2016-09-08,2016-09-08T08:02:12Z,399,NA,38,"schöne 1,5 Zimmer Dachgeschosswohnung in Rissen",hamburg,NA,1
+ObjectID(584ffc31c980817b111fd021),www.immowelt.de/expose/2B37Z49,immowelt,08:02:12,2016-09-08,2016-09-08T08:02:12Z,442,NA,34,Helles Apartment mit halboffener Küche,köln,NA,1
+ObjectID(584ffc32c980817b111fd022),www.immowelt.de/expose/2B2924A,immowelt,08:02:29,2016-09-08,2016-09-08T08:02:29Z,291,NA,48.5,Ideal für Senioren - Stadtwohnung im Grünen,dresden,NA,1
+ObjectID(584ffc32c980817b111fd023),www.immowelt.de/expose/2B6A44A,immowelt,07:18:54,2016-09-08,2016-09-08T07:18:54Z,350,NA,38,Möbliertes 1 Zimmer wohnung.,dresden,NA,1
+ObjectID(584ffc33c980817b111fd024),www.immowelt.de/expose/2BQV24A,immowelt,08:02:33,2016-09-08,2016-09-08T08:02:33Z,260,NA,50,Wohnung!,berlin,NA,1
+ObjectID(584ffc33c980817b111fd025),www.immowelt.de/expose/2BQF74A,immowelt,08:02:29,2016-09-08,2016-09-08T08:02:29Z,432,NA,54,sehr hübsche 2-RAUM Wohnung mit Franz. Balkon - Aufzug in STRIESEN,dresden,NA,1
+ObjectID(584ffc34c980817b111fd026),www.immowelt.de/expose/2BDLZ49,immowelt,08:02:47,2016-09-08,2016-09-08T08:02:47Z,297,NA,32,Sanierte sehr schöne 1 - Zimmerwohnung mit Balkon,berlin,NA,1
+ObjectID(584ffc34c980817b111fd027),www.immowelt.de/expose/2BY6Z49,immowelt,08:03:07,2016-09-08,2016-09-08T08:03:07Z,600,NA,55,Sehr schöne WG-geeignete 2 Zimmerwohnung mit eigenem Garten (Provisionsfrei),köln,NA,1
+ObjectID(584ffc35c980817b111fd028),www.immowelt.de/expose/2BE5Y49,immowelt,08:03:09,2016-09-08,2016-09-08T08:03:09Z,385,NA,39,Frankfurter Berg: 39 qm Singelwohnung mit toller Aussicht zum 1.10.2016 frei! Preis: 385 €/kalt,frankfurt,NA,1
+ObjectID(584ffc35c980817b111fd029),www.immowelt.de/expose/2BKP24A,immowelt,08:03:26,2016-09-08,2016-09-08T08:03:26Z,760,NA,52.6,"Helle, ruhige 2-Zi-Whg. in Großhadern",münchen,NA,1
+ObjectID(584ffc36c980817b111fd02a),www.immowelt.de/expose/2BK744A,immowelt,08:03:22,2016-09-08,2016-09-08T08:03:22Z,350,NA,38,Möbliertes 1 Zimmer wohnung.,hamburg,NA,1
+ObjectID(584ffc36c980817b111fd02b),www.immowelt.de/expose/2BF934A,immowelt,08:04:03,2016-09-08,2016-09-08T08:04:03Z,260,NA,50,Wohnung!,dortmund,NA,1
+ObjectID(584ffc37c980817b111fd02c),www.immowelt.de/expose/2B6824A,immowelt,07:20:53,2016-09-08,2016-09-08T07:20:53Z,338.59,NA,52.09,2 Zimmer-Wohnung in Hamburg-Wilhelmsburg,hamburg,NA,1
+ObjectID(584ffc37c980817b111fd02d),www.immowelt.de/expose/2B6P34A,immowelt,08:04:36,2016-09-08,2016-09-08T08:04:36Z,220,NA,45,**SONNENBALKON** grünes Wohnen in Pankow/Heinersdorf mit Blick auf Schrebergärten,berlin,NA,1
+ObjectID(584ffc38c980817b111fd02e),www.immowelt.de/expose/2BNT24A,immowelt,08:04:49,2016-09-08,2016-09-08T08:04:49Z,260,NA,50,Wohnung!,köln,NA,1
+ObjectID(584ffc38c980817b111fd02f),www.immowelt.de/expose/2B4B24A,immowelt,08:05:03,2016-09-08,2016-09-08T08:05:03Z,350,NA,56,Wohnen in Laubegast,dresden,NA,1
+ObjectID(584ffc39c980817b111fd030),www.immowelt.de/expose/2BFU24A,immowelt,08:05:11,2016-09-08,2016-09-08T08:05:11Z,260,NA,50,Wohnung!,nürnberg,NA,1
+ObjectID(584ffc39c980817b111fd031),www.immowelt.de/expose/2BHF34A,immowelt,08:05:34,2016-09-08,2016-09-08T08:05:34Z,260,NA,50,Wohnung!,leipzig,NA,1
+ObjectID(584ffc3ac980817b111fd032),www.immowelt.de/expose/2BFR74A,immowelt,08:05:35,2016-09-08,2016-09-08T08:05:35Z,265,NA,44.02,** Gemütliche Singlewohnung mit 2 Balkonen und Laminat **,leipzig,NA,1
+ObjectID(584ffc3ac980817b111fd033),www.immowelt.de/expose/2BYXY49,immowelt,08:05:48,2016-09-08,2016-09-08T08:05:48Z,622,NA,46.11,Schöne 2-Zimmer-.Wohnung im Herzen von Eimsbüttel!,hamburg,NA,1
+ObjectID(584ffc3cc980817b111fd034),www.immowelt.de/expose/2BTYS49,immowelt,08:02:31,2016-09-08,2016-09-08T08:02:31Z,350,NA,33,OLYMPIA TOWER - Businesswohnen,münchen,NA,1
+ObjectID(584ffc4ac980817b111fd035),www.immowelt.de/expose/2B3744A,immowelt,08:04:39,2016-09-08,2016-09-08T08:04:39Z,350,NA,38,Möbliertes 1 Zimmer wohnung.,münchen,NA,1
+ObjectID(584ffc4dc980817b111fd036),www.immowelt.de/expose/2BD744A,immowelt,08:05:40,2016-09-08,2016-09-08T08:05:40Z,350,NA,38,Möbliertes 1 Zimmer wohnung.,köln,NA,1
+ObjectID(584ffcc8c980817b111fd03e),www.immowelt.de/expose/2BLP54C,immowelt,16:51:09,2016-09-13,2016-09-13T16:51:09Z,690,NA,58,***KONTAKT BITTE NUR PER EMAIL** Schöne 2-Zimmer Wohnung mit Wohnküche in Trudering ***,münchen,NA,1
+ObjectID(584ffccac980817b111fd03f),www.immobilienscout24.de/expose/90221404,immobilienscout,16:20:46,2016-09-13,2016-09-13T16:20:46Z,850,100,37,Lehel Rarität  mit  Isarblick -,münchen,NA,1
+ObjectID(584ffcd9c980817b111fd061),www.immowelt.de/expose/2BMZH4C,immowelt,16:56:38,2016-09-14,2016-09-14T16:56:38Z,460,NA,55,Helle und freundliche 2 Zimmerwohnung mit Balkon in Köln Weiden zu vermieten provisionsfrei,köln,NA,1
+ObjectID(584ffcdfc980817b111fd06d),www.immobilienscout24.de/expose/90238004,immobilienscout,16:39:19,2016-09-14,2016-09-14T16:39:19Z,345,350,50.73,"Etwas besonderes: interessante 3,5-Zimmer-Wohnung",dortmund,NA,1
+ObjectID(584ffce3c980817b111fd079),www.immowelt.de/expose/2B4HN4C,immowelt,16:56:54,2016-09-14,2016-09-14T16:56:54Z,800,NA,48,IMMOBILIEN SCHNEIDER - NEUBAU Erstbezug - wunderschöne 2 Zimmer Wohnung mit Parkett und Garten,münchen,NA,1
+ObjectID(584ffcf5c980817b111fd0a3),www.immowelt.de/expose/2B8WH4C,immowelt,16:07:48,2016-09-14,2016-09-14T16:07:48Z,354.8,NA,32.55,Ansehen: frisch modernisiertes Wohnglück,berlin,NA,1
+ObjectID(584ffcfbc980817b111fd0b0),www.immobilienscout24.de/expose/90244912,immobilienscout,16:22:58,2016-09-14,2016-09-14T16:22:58Z,400,100,35,MÖBLIERTES WOHNEN,berlin,NA,1
+ObjectID(584ffcffc980817b111fd0b2),www.immowelt.de/expose/2BFQN4C,immowelt,16:22:53,2016-09-14,2016-09-14T16:22:53Z,352,NA,58.6,"*wohnwert-leipzig.de* 2-Zi-Whg/Blk/Parkett/Designbad/Wohnkü./top-Anbindg./Stellpl./ges.: 446,-€",leipzig,NA,1
+ObjectID(584ffd01c980817b111fd0b3),www.immobilienscout24.de/expose/77579880,immobilienscout,16:18:29,2016-09-14,2016-09-14T16:18:29Z,660,200,50,Kleine Maisonette-Wohnung zum Wohlfühlen,münchen,NA,1
+ObjectID(584ffd09c980817b111fd0b5),www.immowelt.de/expose/2B7E44C,immowelt,16:13:40,2016-09-14,2016-09-14T16:13:40Z,400,NA,46,Ruhige und zentrale 1 Zimmer Wohnung mit Wohnküche im Nibelungenviertel - Nähe BA und Luitpoldhain,nürnberg,NA,1
+ObjectID(584ffd19c980817b111fd0b6),www.immowelt.de/expose/2BJGJ4C,immowelt,16:14:04,2016-09-14,2016-09-14T16:14:04Z,535,NA,60,Gemütliche2-Zimmer-Wohnung im Mehrfamilienhaus,berlin,NA,1
+ObjectID(584ffd1ec980817b111fd0b7),www.immowelt.de/expose/2BPLP4C,immowelt,16:08:01,2016-09-14,2016-09-14T16:08:01Z,370,NA,38,1 Zimmer Wohnung in Hamburg Heimfeld,hamburg,NA,1
+ObjectID(584ffd24c980817b111fd0b9),www.immowelt.de/expose/2BLDS4C,immowelt,07:59:54,2016-09-15,2016-09-15T07:59:54Z,595,NA,46,ELEGANTE SINGELWOHNUNG - CENTRAL ABER RUHIG GELEGEN IN EHRENFELD,köln,NA,1
+ObjectID(584ffd24c980817b111fd0ba),www.immobilienscout24.de/expose/90245804,immobilienscout,07:54:58,2016-09-15,2016-09-15T07:54:58Z,309,100,35.64,*Singlewohnung mit neuer EBK*Zentrumsnah*,leipzig,NA,1
+ObjectID(584ffd28c980817b111fd0ca),www.immowelt.de/expose/2X4QT3W,immowelt,07:54:55,2016-09-15,2016-09-15T07:54:55Z,365,NA,48,MÖBLIERTE 2-ZIMMER-ALTBAUWOHNUNG; NÄHE HAUPTBAHNHOF!!,nürnberg,NA,1
+ObjectID(584ffd29c980817b111fd0ce),www.immowelt.de/expose/2BQTU4C,immowelt,07:59:55,2016-09-15,2016-09-15T07:59:55Z,540,NA,55.52,WOHNBAU GMBH2-Zimmer-Wohnung in Hamburg - Eidelstedt,hamburg,NA,1
+ObjectID(584ffd2cc980817b111fd0d6),www.immowelt.de/expose/2B3DQ4C,immowelt,07:26:30,2016-09-15,2016-09-15T07:26:30Z,360.43,NA,56,SAGA GWG Mietobjekt,hamburg,NA,1
+ObjectID(584ffd2dc980817b111fd0db),www.immowelt.de/expose/2BNUT4C,immowelt,07:26:31,2016-09-15,2016-09-15T07:26:31Z,350,NA,38,Möbliertes 1 Zimmer wohnung.,frankfurt,NA,1
+ObjectID(584ffd34c980817b111fd0f4),www.immobilienscout24.de/expose/75720407,immobilienscout,07:26:55,2016-09-15,2016-09-15T07:26:55Z,295,100,38,Komfortable Single Wohnung in Gartenstadt,berlin,NA,1
+ObjectID(584ffd35c980817b111fd0f9),www.immowelt.de/expose/2BAUS4C,immowelt,08:00:13,2016-09-15,2016-09-15T08:00:13Z,405,NA,44.31,LANGENHORN-NORD: Schöne 2 Zimmer-Wohnung mit Balkon im 1.OG mit zusätzlichem Gästezimmer im Dachgeschoss,hamburg,NA,1
+ObjectID(584ffd38c980817b111fd0fe),www.immobilienscout24.de/expose/90256789,immobilienscout,07:21:45,2016-09-15,2016-09-15T07:21:45Z,364,100,40,Siemensstadt - kleine 1 Zimmer Wohnung*neu renoviert*Duschbad*Erdgeschoss*,berlin,NA,1
+ObjectID(584ffd3ac980817b111fd104),www.immowelt.de/expose/2B5YX4C,immowelt,07:55:52,2016-09-15,2016-09-15T07:55:52Z,320,NA,59.4,Willkommen daheim!,leipzig,NA,1
+ObjectID(584ffd3fc980817b111fd114),www.immowelt.de/expose/2B2XX4C,immowelt,07:55:52,2016-09-15,2016-09-15T07:55:52Z,250,NA,44,schöne Wohnung mit Laminatboden,leipzig,NA,1
+ObjectID(584ffd46c980817b111fd126),www.immobilienscout24.de/expose/90256787,immobilienscout,06:51:24,2016-09-15,2016-09-15T06:51:24Z,284,200,41,WOHLFÜHLEN GARANTIERT,magdeburg,NA,1
+ObjectID(584ffd4ac980817b111fd128),www.immobilienscout24.de/expose/90254127,immobilienscout,06:51:25,2016-09-15,2016-09-15T06:51:25Z,500,100,56,1-Zimmer Wohnung Voll Möbliert !,köln,NA,1
+ObjectID(584ffd55c980817b111fd12a),www.immowelt.de/expose/29RRK4H,immowelt,06:40:41,2016-09-15,2016-09-15T06:40:41Z,450,NA,53,SCHÖNE UND LICHTDURCHFLUTETE 2 ZIMMER WOHNUNG IN NBG./ OT EIBACH,nürnberg,NA,1
+ObjectID(58500160c980817b111fd167),www.immowelt.de/expose/2BPHJ4P,immowelt,06:33:05,2016-10-13,2016-10-13T06:33:05Z,240,NA,40.74,"1ZKB 40,74m² Laminat, Wohnküche, DG, 15Minuten zur Uni",leipzig,NA,4
+ObjectID(58516b8cc980817b111fd288),www.immobilienscout24.de/expose/89356393,immobilienscout,16:06:50,2016-07-18,2016-07-18T16:06:50Z,245.15,200,41.41,"ruhig, Tageslichtbad",leipzig,NA,4
