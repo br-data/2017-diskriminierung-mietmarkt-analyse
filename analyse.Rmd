@@ -1,0 +1,1126 @@
+---
+output:
+  html_notebook:
+    code_folding: hide
+    fig_height: 5
+    fig_width: 9
+    theme: spacelab
+  html_document: default
+---
+
+<!-- R Notebook setup -->
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(echo = FALSE,
+            fig.path = '01_output_img/',
+            fig.width = 9,
+            fig.height = 5,
+            warning = FALSE, 
+            message = FALSE)
+library(readxl)
+library(tidyverse)
+library(lme4)
+library(epitools)
+library(PropCIs)
+```
+
+<style>
+  .col2 {
+    columns: 2 200px;         /* number of columns and width in pixels*/
+    -webkit-columns: 2 200px; /* chrome, safari */
+    -moz-columns: 2 200px;    /* firefox */
+  }
+  h3 {
+  margin-top: 28px;
+  }
+  h4 {
+    margin-top: 40px;
+  }
+</style>
+
+<!-- read in data -->
+```{r read_data perform joins, include = FALSE}
+
+persons = read_excel("input/persons.xlsx") %>% 
+  # modifying value "extreme", since aggregation of both extremes doesn't make sense
+  mutate(typ = ifelse(name == "Carsten Meier", "extreme positive", typ)) %>%
+  mutate(typ = ifelse(name == "Lovis Kuhn", "extreme negative", typ)) %>%
+  rename(kuerzel = reihenfolge)
+
+confirmations = read_csv("input/confirmations.csv", 
+  col_types = cols(
+    date = col_datetime(format = "%Y-%m-%dT%H:%M:%S%Z"),
+    delta = col_double(),
+    delta_bin = col_number())) %>%
+  rename(link = flat_link) %>%
+  mutate(run = ifelse(date < as.Date("2016-08-31"), 1, 2)) %>%
+  mutate(duplicate = (duplicate == "true")) %>%
+  mutate(first = (first == "true"))
+
+flats = read_csv("input/flats.csv", 
+  col_types = cols(
+    request_date = col_date(format = "%Y-%m-%d"),
+    request_datetime = col_datetime(format = "%Y-%m-%dT%H:%M:%S%Z"),
+    flat_meta.price = col_double(),
+    flat_meta.surface = col_double())) %>%
+  # add column run analogue to mails
+  mutate(run = ifelse(request_date < as.Date("2016-08-31"), 1, 2)) %>%
+  mutate(geography = ifelse(city %in% c("berlin", "dresden", "leipzig", "magdeburg"), "ost", "west")) %>%
+  # calculate a 'normalized' order concerning only non-duplicate requests from normal profiles
+  mutate(
+    order_normal = gsub("[xy]", "", order),
+    # convert first occurence of a person from each nationality
+    order_normal = sub("a", "A", order_normal),
+    order_normal = sub("i", "I", order_normal),
+    order_normal = sub("p", "P", order_normal),
+    order_normal = sub("t", "T", order_normal),
+    order_normal = sub("g", "G", order_normal),
+    # remove duplicate occurences
+    order_normal = gsub("[aiptg]", "", order_normal),
+    order_normal = tolower(order_normal)
+  )
+
+# select immowelt-version of flats inserated on both websites (with same title)
+flats_duplicates_immowelt = flats %>%
+  group_by(city, flat_meta.price, flat_meta.surface, request_date, flat_meta.title) %>%
+  summarise(n = n(), website_distinct = n_distinct(website), link = max(link), run = max(run)) %>%
+  select(-flat_meta.title) %>%
+  filter(n == 2) %>%
+  arrange(website_distinct) %>%
+  filter(website_distinct == 2)
+
+# select immowelt-version of flats inserated on both websites (without same title)
+flats_duplicates_immowelt_excl = flats %>%
+  group_by(city, flat_meta.price, flat_meta.surface, request_date) %>%
+  summarise(n = n(), website_distinct = n_distinct(website), link = max(link), run = max(run)) %>%
+  filter(n == 2) %>%
+  arrange(website_distinct) %>%
+  filter(website_distinct == 2)
+
+flats = flats %>%
+  anti_join(flats_duplicates_immowelt, by = c("link", "run")) %>%
+  anti_join(flats_duplicates_immowelt_excl, by = c("link", "run"))
+
+# e.g. flats whose owners uncovered our experiment
+flatsTrash = read_csv("input/_flats_trash.csv", 
+    col_types = cols(
+    request_date = col_date(format = "%Y-%m-%d"),
+    request_datetime = col_datetime(format = "%Y-%m-%dT%H:%M:%S%Z"),
+    flat_meta.price = col_double(),
+    flat_meta.surface = col_double())) %>%
+  # add column run analogue to mails
+  mutate(run = ifelse(request_date < as.Date("2016-08-31"), 1, 2))
+
+mails = read_excel("input/mails.xlsx",
+  col_types = c("text", "text", "text", "text",
+    "numeric", "numeric", "numeric", "text")) %>%
+  # consistent NA-values
+  mutate_each(funs(replace(., . == "NA", NA))) %>%
+  mutate_each(funs(replace(., . == ",", NA))) %>%
+  mutate(zeit = parse_datetime(zeit)) %>%
+  # Absender nicht 100% konsistent. Manueller fix:
+  mutate(person = ifelse(person == "drcarstenmeier@gmail.com", "carsten.j.meier@gmail.com", person)) %>%
+  mutate(person = ifelse(person == "dan.bschle.im@gmail.com", "danielbuschle2@gmail.com", person)) %>%
+  mutate(person = ifelse(person == "maryam.abedini.im@gmail.com", "ma03592@gmail.com", person)) %>%
+  mutate(person = ifelse(person == "milena.adamowicz.im@gmail.com", "madameowicz@gmail.com", person)) %>%
+  # Entferne Mails an Gulsen Demirci (TODO: in Excel)
+  filter(!person == "gulsen.demirci.im@gmail.com") %>%
+  filter(!is.na(person)) %>%
+  # Remove because of inconsistent categorizing (TODO: in Excel)
+  filter(!(id %in% c("ObjectId(578793e9a013d54b71559407)", "ObjectId(5788e55ba013d54b7155944a)", "ObjectId(578793e4a013d54b71559401)"))) %>%
+  # Remove mail-duplicates (no usage of unique() because of property id)
+  distinct(zeit, person, flat_id, .keep_all = TRUE) %>%
+  # setNames(gsub("ErsterWertvon", "", names(.))) %>%
+  rename(run = scraping_run) %>%
+  rename(link = flat_link) %>%
+  mutate(link = ifelse(is.na(link), "unknown", link)) 
+
+update_links = function(path) {
+  # update mails_meta with corrected links from new CSV-file 
+  
+  mails_updated = read_csv(path, trim_ws = TRUE)
+  mails %>%
+    left_join(mails_updated, by = c("id")) %>%
+    mutate(link = ifelse(is.na(link.y), link.x, link.y)) %>%
+    select(-link.x, -link.y)
+}
+
+mails = update_links("input/_add_links_short.csv")
+mails = update_links("input/_add_links_5_7_short.csv")
+mails = update_links("input/_fix_links_short.csv")
+mails = update_links("input/_fix_links_round2_short.csv")
+
+# TODO: no (--> cat6) in Excel
+mails = mails %>% 
+  filter(link != "no" & link != "pre" & link != "quoka" & link != "stage0")
+
+# remove mails that relate to black-listed flats
+mails = mails %>%
+  anti_join(flatsTrash, by = c("link", "run")) 
+
+
+################################## JOIN METADATA TO UNITS ##################################
+
+mails_meta = mails %>%
+  left_join(persons, by = c("person" = "mail_1")) %>%
+  select(id, zeit, category, link, person,
+    run, herkunft, typ, migrationshintergrund, geschlecht, name, kuerzel)
+
+# dynamically join flat metadata to mails 
+mails_meta = mails_meta %>%
+  left_join(flats, by = c("link", "run")) %>%
+  rename(flat_metaprice = flat_meta.price) %>%
+  rename(scrape_date = request_date)
+
+find_positions = function(patterns, texts) {
+  # returns vector with position of i-th element in patterns in i-th element of texts
+  
+  apply(cbind(patterns, texts), 1, function(v) { regexpr(v[1], v[2]) })
+}
+
+confirmations_meta = confirmations %>%
+  left_join(persons, by = c("person" = "mail_1")) %>%
+  inner_join(flats %>% select(link, run, order_normal), by = c("link", "run")) %>%
+  mutate(position_normal = find_positions(kuerzel, order_normal))
+
+flats_meta = flats %>%
+  left_join(confirmations_meta %>% select(link, run, geschlecht) %>% unique(), by = c("link", "run"))
+```
+
+<!-- part of data preparation for global analysis only -->
+```{r filter-units-meta, include = FALSE}
+
+# black-list of mails because of category
+mails_cat578 = mails_meta %>%
+  filter(category == 5 | category == 7 | category == 8)
+
+mails_meta = mails_meta %>%
+  # filter mails relating to flats that were assigned 5, 7 or 8
+  anti_join(mails_cat578 %>% filter(link != "unknown"), by = c("link", "run"))
+
+mails_linked = mails_meta %>% 
+  filter(link != "unknown")
+
+flats_meta = flats_meta %>%
+  anti_join(mails_cat578, by = c("link", "run"))
+
+confirmations_meta = confirmations_meta %>%
+  anti_join(mails_cat578, by = c("link", "run"))
+
+confirmations_meta_unique = confirmations_meta %>% 
+  filter(duplicate != TRUE) %>%
+  inner_join(flats %>% select(link, run, orga, city, order), by = c("link", "run"))
+```
+
+
+
+# **Diskriminierung auf dem deutschen Wohnungsmarkt**
+
+### Das Experiment
+Im Juni und September 2016 haben wir uns in einem automatisierten Prozess auf `r nrow(flats)` Wohnungsannoncen in `r tools::toTitleCase(unique(mails_meta[!is.na(mails_meta$city),]$city))` beworben. Die Absender der `r nrow(confirmations)` E-Mail-Anfragen unterschieden sich lediglich im Namen, der auf einen deutschen, arabischen, türkischen, italienischen oder polnischen Hintergrund schließen lässt. In ihren sonstigen Eigenschaften waren die Personen identisch – zwischen 20 und 30 Jahre alt, Berufseinsteiger in einer Agentur, mit Anschreiben in perfektem Deutsch. Männer und Frauen waren gleich häufig vertreten.
+
+Auf die Anfragen erhielten wir rund 8000 Antworten, die wir händisch in Kategorien einsortierten. Nur so konnten wir sicher erfassen, ob ein Bewerber zur Wohnungsbesichtigung eingeladen wurde oder nicht. Das Ergebnis ist ein Datensatz, der ein Schlaglicht auf den deutschen Mietwohnungsmarkt wirft, aber zugleich groß genug ist, um signifikante Unterschiede zwischen Nationalitäten, Geschlechtern und Städten zu zeigen. 
+
+### Datensatzbeschreibung
+Im Kern besteht der Datensatz aus vier Tabellen:  
+
+- **persons.xlsx** - Die 14 fiktiven Personen, die für die Kontaktaufname genutzt wurden sowie deren Name, Geschlecht, Herkunft und Mail-Adresse.
+- **confirmations.csv** - Übersicht über alle im Lauf des Versuchs erfolgreich angefragten Wohnungsannoncen. Beinhaltet u.A. die anfragende Person, den Link zur Annonce sowie den zeitlichen Abstand zwischen den Anfragen mit den verschiedenen Profilen.
+- **flats.csv** - Beinhaltet die Meta-Daten zu den angefragten Wohnungen. Aus Datenschutzgründen werden Informationen, die Rückschlüsse auf einzelne Wohnungen oder Inserenten zulassen (Ansprechpartner, Adresse, Betreff, Telefonnumer) nicht veröffentlicht.
+- **mails.xlsx** - Die Kategorisierung der empfangenen Emails. Es wurde folgendes Codebuch verwendet:
+
+| Kategorie | Umschreibung |
+|:-----:|:-----|
+| 1 | positv: Zusage eines Besichtigungstermins |
+| 2 | positive Tendenz: Ein Besichtigungstermin wird in Aussicht gestellt|
+| 3 | Kenntnise: Anfrage wurde zur Kenntnis genommen. Enthält keine Wertung |
+| 4 | negativ: Absage |
+| 5 | Wohung nicht verwertbar: z.B. Seniorenwohnanlage, WG-Zimmer |
+| 6 | Mail nicht verwertbar: keine relevante Aussage (z.B. Newsletter) |
+| 7 | Makler-Masche: Versuchtes Umgehen des Besteller-Prinzips |
+| 8 | Spam/Scam: Ohne Aussage hinsichtlich der Diskriminierung |
+
+Für die folgenden Analysen wurden die einzelnen Datensätze jeweils gejoint (Namenssufix "_meta"). So enthält der data frame *mails_meta* nicht nur die Informationen zu den klassifizierten Antwortschreiben sondern auch die Personenmerkmale des fiktiven Charakters, der die Bewerbung gesendet hat sowie Metainformationen zur angefragten Wohnung. Entfernt wurden aus diesen Datensätzen zudem sämtliche Wohnungsannoncen, registierte Anfragen sowie eingegange Antworten von Anbietern, die uns im Lauf der Auswertung nicht verwertbare Antworten zugesendet habe (Kategorien 5,7 & 8).
+
+### Berechnungen
+
+#### Hilfsfunktion: Generalised Linear Mixed Model
+
+Neben deskriptiven Auswertungen führen wir Regressionen durch um Erstere entweder abzusichern oder die Ergebnisse aus dem Modell direkt in der Berichterstattung zu verwenden. Ein Ziel ist es dabei, den Effekt einer im Interesse stehenden Variable von Verzerrungen durch andere Faktoren zu separieren (sprich diese zu "kontrollieren").
+
+Zur Methode: Wir rechnen eine logistische Regression mit einem Zufallsfaktor (Random Intercept) je ausgeschriebener Wohnung. Wir modellieren damit die Auswirkungen verschiedener Faktoren auf die Wahrscheinlichkeit, eine positive Rückmeldung auf eine Wohnungsanfrage zu erhalten. Die resultierenden Koeffizienten einer logistischen Regression beziehen sich auf logarithmierte Chancen (logits) und sind inhaltlich kaum interpretierbar. Daher verwenden wir in der Auswertung Average Marginal Effects (AMEs): Sie beschreiben den durchschnittlichen Effekt eines Faktors auf die Wahrscheinlichkeit eine positiven Antwort zu erhalten.
+
+```{r log-regr}
+
+glmermfx <- function(x, nsims = 1000){
+  # implements a funtion to calculate AMEs for mixed model GLMs
+  # and its standard errors (for latter: Krinsky and Robb method)
+  
+  set.seed(1984)
+  # fitted returns the predicted probabilities
+  # equivalences: -log((1-p)/p)) == log(p/(1-p)) == logit == x' * beta
+  # pdf is the average value of all approprietly transformed predicted values
+  pdf <- mean(dlogis(-log((1 - fitted(x)) / fitted(x))))
+  
+  # error in working paper: pdfsd does not measure the standard error, but the standard deviation of the predicted probabilities
+  # pdfsd <- sd(dlogis(-log((1-fitted(x))/fitted(x))))
+  
+  marginal.effects <- pdf * fixef(x)
+  # sim simulates 1000 fixef-vectors (based on fixef(x) and its standard errors)
+  sim <- matrix(rep(NA, nsims * length(fixef(x))), nrow = nsims)
+  for(i in 1:length(fixef(x))){
+    sim[ ,i] <- rnorm(nsims, fixef(x)[i],diag(vcov(x)^0.5)[i])
+  }
+
+  # transpose sim in order to select fixed effects per Simulation
+  sim_t <- as.list(data.frame(t(sim)))
+  # simulate pdf a 1000 times using the simulated fixed effects
+  pdfsim <- sapply(sim_t, function(b) {
+    names(b) = names(fixef(x))
+    mean(dlogis(predict(x, type = "link", newparams = list(beta = b))))
+  })
+  # error in working paper because of pdfsd (see above):
+  # pdfsim <- rnorm(nsims,pdf,pdfsd)
+
+  # calculate 1000 AMEs (same dimension as sim)
+  sim.se <- pdfsim * sim
+  
+  # error in working paper: 
+  # res <- cbind(marginal.effects,sd(sim.se))
+  # instead: 
+  res <- cbind(marginal.effects, apply(sim.se, 2, sd))
+  colnames(res)[2] <- "standard.error"
+
+  # calculation of p-values
+  # assumption: AMEs normal-distributed  with E(AME) = AME
+  # z-value = AME / se(AME)
+  # verified with logitmfx
+  res <- cbind(res, 2 * pnorm(-abs(res[ ,1] / res[ ,2])))
+  colnames(res)[3] <- "p-value"
+
+  ifelse(names(fixef(x))[1] == "(Intercept)", return (res[2:nrow(res), ]), return(res))
+}
+
+calculate_regression = function(flats_both, var_interact = NULL, vars_exclude = NULL) {
+  # calculates mixed model for requests made to flats in flats_both (1 row ~ 1 flat ~ 2 requests)
+  # var_interact is expected to be a single string
+  # vars_exclude is expected to be a vector of strings
+  
+  # convert flats_both to long-format (1 row ~ 1 request)
+  flats_both_long = gather(flats_both, nat, positive, positive_ref, positive_req, factor_key = TRUE) %>%
+    mutate(
+      # extract "ref" or "req"
+      nat = substr(nat, 10, 12),
+      second = !first,
+      position = ifelse(nat == "req", second + 1, first + 1),
+      positive = as.numeric(positive),
+      geschlecht = factor(geschlecht),
+      nat = factor(nat),
+      position = factor(position), 
+      # uncomment run and city when running simulate_auspurg()
+      run = factor(run),
+      city = ifelse(city=="münchen", "_münchen", city)
+    ) 
+  
+  if (is.null(var_interact)) {
+    
+    # default forumula for regression
+    s = "positive ~ nat + city + orga + geschlecht + position + run + (1 | link)"
+  } else {
+    
+    s = paste0("positive ~ ", var_interact, " * ", "nat + city + orga + geschlecht + position + run + (1 | link)")
+  }
+  
+  
+  if (!is.null(vars_exclude)) {
+    
+    exclude_var = function (formula_string, var_exclude) {
+      # excludes variable var_exclude from formula
+      
+      gsub(paste0(" + ", var_exclude), "", formula_string, fixed = TRUE)
+    }
+    
+    # exclude each var in vars_exclude from formula
+    s = Reduce(exclude_var, vars_exclude, init = s)
+  }
+  
+  print(s)
+  f = formula(s)
+  
+  # estimate the model and store results in m
+  m <- glmer(f, data = flats_both_long, family = binomial(link = logit), control = glmerControl(optimizer = "bobyqa"), nAGQ = 10)
+  
+  # OR-estimates with 95% CIs (see http://stats.idre.ucla.edu/r/dae/mixed-effects-logistic-regression/)
+  se <- sqrt(diag(vcov(m)))
+  tab <- cbind(Est = fixef(m), LL = fixef(m) - 1.96 * se, UL = fixef(m) + 1.96 * se)
+  exp(tab)
+  
+  print(glmermfx(m)) 
+  m
+}
+```
+
+Zur Implementierung: Die Berechnung der marginalen Effekte im logistischen Modell ist dem Working Paper [Simple Logit and Probit Marginal Effects in R](http://researchrepository.ucd.ie/bitstream/handle/10197/3404/WP11_22.pdf) von Alan Fernihough entnommen. Die Berechnung der Standardfehler wurde korrigiert und wird nach der [Methode von Krinsky and Robb](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3976195/) berechnet.
+
+####**Diskriminierung**
+Am klarsten lässt sich Diskriminierung erkennen, wenn unsere fiktiven Personen bei der Bewerbung auf eine identische Wohnung unterschiedliche Antworten erhalten haben. Wir betrachten hier also Wohnungen, die von einer Persona der jeweiligen Minderheit (arabisch, italienisch, polnisch, türkisch) und einer deutschen Persona erfolgreich angeschrieben wurde. Die Zahl auswertbarer Wohnungen je Nationalität beträgt: 
+
+```{r counts-per-nat}
+
+# set reference nationality against which to evalutate discrimination
+# g: "german"
+nat_ref = "g"
+
+nats_f_long = c("arabisch", "italienisch", "polnisch", "türkisch")
+nats_f = c("a", "i", "p", "t")
+
+
+calculate_flats_both = function(nat_req, nat_ref) {
+  # returns flats that were correctly requested by a 2-tuple of persons of the requested nationality nat_ref and the reference nationality nat_req
+
+  # flats requested from tuple nat_ref * nat_req
+  flats_both = flats_meta %>%
+    filter(grepl(nat_ref, order)) %>%
+    filter(grepl(nat_req, order))
+  
+  # all mails linked with a flat from flats_both
+  mails_both = mails_linked %>%
+    semi_join(flats_both, by = c("link", "run"))
+  
+  calculate_flats_cat = function(nat) {
+    # calculates flats that received at least 1 email from the corresponding persona of nationality nat and the lowest category in case of several emails
+    
+    cat = paste("cat_", ifelse(nat == nat_ref, "ref", "req"), sep = "")
+  
+    # flatwise select lowest category assigned to corresponding persona of nationality nat
+    mails_both %>%
+      filter(kuerzel == nat) %>%
+      group_by(link, run) %>%
+      filter(category == min(category)) %>%
+      mutate_(.dots = setNames("category", cat)) %>%
+      slice(1) %>%
+      select_("link", "run", cat)
+  }
+  
+  flats_cat_req = calculate_flats_cat(nat_req)
+  flats_cat_ref = calculate_flats_cat(nat_ref)
+  
+  # add columns that indicate whether each nationality received a positive answer (category 1 or 2) 
+  flats_both %>%
+    left_join(flats_cat_req, by = c("link", "run")) %>%
+    left_join(flats_cat_ref, by = c("link", "run")) %>%
+    select(link, run, orga, geschlecht, geography, city, cat_req, cat_ref, order_normal) %>%
+    # subset-flats
+    # filter(cat_f < 5 | cat_g < 5) %>%
+    mutate(
+      position_ref = find_positions(nat_ref, order_normal),
+      position_req = find_positions(nat_req, order_normal),
+      # dynamically build property first of 2-tuple
+      first = position_req < position_ref,
+      positive_req = !is.na(cat_req) & (cat_req<3),
+      positive_ref = !is.na(cat_ref) & (cat_ref<3),
+      discr = ifelse(positive_ref == positive_req, positive_ref + positive_req, positive_ref - positive_req)
+    ) # %>%
+    # 3-Felder Analyse für Modell
+    # filter(discr != 0)
+}
+
+# contains flats_both for each nationality
+flats_both_list = lapply(nats_f, calculate_flats_both, nat_ref = nat_ref)
+
+# contains raw counts of correct pairs for each nationality
+counts_flats_both = sapply(flats_both_list, nrow)
+names(counts_flats_both) = nats_f_long
+counts_flats_both
+```
+
+Jede dieser Wohnungen lässt sich in folgende Kategorien einordnen:
+
+- np: Die deutsche Persona wird benachteiligt (-1)
+- nn: Beide Personas erhalten negative Antwort (0)
+- pn: Die Minderheit wird benachteiligt (1)
+- pp: Beide Personas erhalten positive Antwort (2)
+
+Für die vier untersuchten Minderheiten sieht das folgendermaßen aus:
+
+```{r discr-per-nat}
+
+# calculate counts of positve and negative discrimination
+calculate_counts = function(flats_both) {
+  
+  # for consideration of cases with at least 1 positive response
+  length_three_fields = nrow(flats_both %>% filter(discr != 0))
+
+  # count positive and negative discrimination
+  flats_both %>%
+    count(discr, sort = FALSE) %>%
+    mutate(share = n / nrow(flats_both)) %>%
+    mutate(share_three_fields = ifelse(discr == 0, NA, n / length_three_fields))
+}
+
+discr_counts_list = lapply(flats_both_list, calculate_counts)
+names(discr_counts_list) = nats_f_long
+discr_counts_list
+
+# focus on 3-Felder-Tafel for rest of the notebook
+flats_both_list = lapply(flats_both_list, function(flats_both) { flats_both %>% filter(discr != 0) })
+```
+
+Neben einer Bevorzugung der deutschen Bewerber (pn) gibt es ebenso Fälle, in denen nur die Person mit ausländisch klingendem Namen eine positive Antwort erhält (np). Das kann eine bewusste Entscheidung des Vermieters sein. Oder schlicht damit zusammenhängen, dass der deutsche Bewerber später angeschrieben und der Vermieter die Anfrage gar nicht erst gelesen hat.
+
+Um das tatsächliche Ausmaß der Diskriminierung von Personen mit ausländischem Namen nicht zu überschätzen, berücksichtigen wir auch diese Fälle bei der Berechnung der Diskriminierungsrate: `NDR = (pn - np) / (pp + pn + np)`
+
+<!-- (siehe Working Paper [Hinz, Auspurg, Schmid 2011](https://cms.uni-konstanz.de/soziologie/professuren/prof-dr-thomas-hinz/forschung/aktuelle-forschungsprojekte/ethnische-diskriminierung/ethnic-discrimination/)). -->
+
+```{r rates-per-nat}
+
+share_to_percent = function(share) {
+  # converts share to percent and rounds to first decimal after the comma
+  
+  round(share * 100, 1)
+}
+
+convert_numeric0 = function(i) { 
+  # converts numeric0 to 0
+  
+  ifelse(is.numeric(i) & length(i) == 0L, 0, i)
+}
+
+# return vector of GDR and NDR in %-points
+calculate_rates = function(discr_counts) {
+  
+  discr_count_neg = convert_numeric0((discr_counts %>% filter(discr == -1) %>% select(n))[[1]])
+  discr_count_2 = (discr_counts %>% filter(discr == 2) %>% select(n))[[1]]
+  discr_count_pos = convert_numeric0((discr_counts %>% filter(discr == 1) %>% select(n))[[1]])
+  
+  # 3-Felder-Tafel
+  discr_count_0 = 0
+  # 4-Felder-Tafel
+  # discr_count_0 = (discr_counts %>% filter(discr == 0) %>% select(n))[[1]]
+
+  # # 3-Felder-Tafel
+  discr_count_sum = discr_count_neg + discr_count_pos + discr_count_2
+  # 4 Felder-Tafel
+  # discr_count_sum = (discr_counts %>% summarise(sum = sum(n)) %>% select(sum))[[1]]
+  
+  table_1_response_var = matrix(c(discr_count_pos + discr_count_2, discr_count_neg + discr_count_2, discr_count_0 + discr_count_neg, discr_count_0 + discr_count_pos), nrow = 2)
+  colnames(table_1_response_var) = c("positive", "negative")
+  rownames(table_1_response_var) = c("german", "foreign")
+  
+  # calculate Odds Ratio + confidence interval
+  or_vector = orscoreci(table_1_response_var[1, 1],sum(table_1_response_var[1, ]), table_1_response_var[2, 1],sum(table_1_response_var[2, ]), 0.95)$conf.int
+  or_lower= or_vector[1]
+  or = (table_1_response_var[1, 1] * table_1_response_var[2, 2]) / (table_1_response_var[1, 2] * table_1_response_var[2, 1])
+  or_upper = or_vector[2]
+  
+  # calculate Risk Ratio + confidence interval
+  rr_vector = riskscoreci(table_1_response_var[1, 1],sum(table_1_response_var[1, ]), table_1_response_var[2, 1],sum(table_1_response_var[2, ]), 0.95)$conf.int
+  rr_lower= rr_vector[1]
+  rr = (table_1_response_var[1, 1] / sum(table_1_response_var[1, ])) / (table_1_response_var[2, 1] / sum(table_1_response_var[2, ]))
+  rr_upper = rr_vector[2]
+  
+  # calculate gross discrimination rate
+  gdr = discr_count_pos / discr_count_sum
+  gdr_interval = prop.test(discr_count_pos, discr_count_sum, conf.level = 0.95)$conf.int
+  
+  # calculate net disrimination rate
+  ndr = gdr - (discr_count_neg / discr_count_sum)
+  ndr_interval = prop.test(table_1_response_var, conf.level = 0.95)$conf.int
+  # alternative to calculate conf-int: t.test(flats_both$positive_req, flats_both$positive_ref)
+
+  c(sapply(c(ndr_interval[2], ndr, ndr_interval[1], gdr_interval[2], gdr, gdr_interval[1]), share_to_percent), or_lower, or, or_upper, rr_lower, rr, rr_upper)
+}
+
+discr_rates_matrix = sapply(discr_counts_list, calculate_rates)
+colnames(discr_rates_matrix) = nats_f_long
+rownames(discr_rates_matrix) = c("NDR_upper", "NDR", "NDR_lower", "GDR_upper", "GDR", "GDR_lower", "OR_lower", "OR", "OR_upper", "RR_lower", "RR", "RR_upper")
+discr_rates_matrix[1:3, ]
+```
+
+Wir setzen also die Fälle von Ungleichbehandlung ins Verhältnis zur Zahl der Wohnungen, deren Vermieter auf mindestens eine unserer beiden Anfragen positiv reagiert haben. Fälle, in denen keine unserer Personen eine Zusage erhalten hat (nn), berücksichtigen wir nicht bei der Ermittlung der Diskriminierungsrate. Sie zeigen vielmehr, wie angespannt der Wohnungsmarkt ist. Hier eine grafische Darstellung der Ergebnisse:
+
+
+```{r rates-per-nat-plot}
+
+# bring discr_rates_matrix into tidy form
+summary_global = data.frame(discr_rates_matrix) %>%
+  rownames_to_column("rate") %>%
+  gather(nationality, value, arabisch:türkisch, factor_key = FALSE) %>%
+  filter(rate == "NDR" | rate == "GDR") %>%
+  arrange(rate, nationality)
+
+# add columns with lower and upper bound of the confidence interval
+summary_global[[4]] = c(discr_rates_matrix["GDR_lower", ], discr_rates_matrix["NDR_lower", ])
+summary_global[[5]] = c(discr_rates_matrix["GDR_upper", ], discr_rates_matrix["NDR_upper", ])
+colnames(summary_global)[4:5] <- c("lower", "upper")
+
+ggplot(
+    summary_global %>%
+      filter(rate == "NDR"), 
+    aes(x = nationality, y = value, fill = rate)) + 
+  geom_bar(
+    stat = "identity",
+    colour = "black", 
+    fill = "#535353",
+    size = .3) +
+  geom_text(
+    aes(x = nationality, y = value, label = paste0(round(value, 0), "%")),
+    # nudge_y = 5,
+    colour="#333333",
+    position = position_dodge(width = 1),
+    vjust = -0.5) +
+  geom_errorbar(
+    aes(ymin = lower, ymax = upper),
+    size = .3,
+    width = .2,
+    position = position_dodge(.9)) +
+  scale_y_continuous(breaks = 0:20 * 4) +
+  theme_bw() + 
+  labs(subtitle = "Lesebeispiel: In ca. 12 % der Fälle, in denen ein Deutscher eine Einladung zu einer Besichtigung erhält, werden Menschen mit polnischem\n Namen übergangen.", x = "Nationalität", y = "Diskriminerung (%)")
+```
+
+P-Values werden mithilfe von McNemar-Tests berechnet, um die statistische Signifikanz der einzelnen Netto-Diskriminierunsraten zu überprüfen: 
+
+```{r mcnemar}
+
+calculate_mcnemar = function(flats_both) {
+  # calculate McNemar p-values of discrimination for a list of flats  
+
+  # table(flats_both[,c("positive_ref", "positive_req")]),
+  mcnemar.test(table(flats_both[ , c("positive_ref", "positive_req")]))$p.value
+}
+
+mcnemar_value_list = sapply(flats_both_list, calculate_mcnemar)
+names(mcnemar_value_list) = nats_f_long
+mcnemar_value_list
+```
+
+Ergebnis:
+
+- **Bewerber mit ausländisch klingendem Namen werden auf dem Mietmarkt gegenüber deutschen Bewerbern deutlich und statistisch signifikant benachteiligt.**
+- **In jedem vierten Fall, in dem ein Deutscher eine Einladung zu einer Besichtigung erhält, werden Menschen mit türkischem oder arabischem Namen übergangen.** Damit werden sie mehr als doppelt so stark diskriminiert wie italienische oder polnische Bewerber. Diese werden ebenfalls statistisch signifikant benachteiligt, allerdings mit einer deutlich niedrigeren Häufigkeit.
+
+Wir sichern die Diskriminierungsraten mit einer logistischen Regression ab, um andere Faktoren wie die Reihenfolge der Anschreiben oder den Run zu kontrollieren. Mit diesem Vorgehen beziehen wir uns auf eine [Studie](http://www.sciencedirect.com/science/article/pii/S1051137717300037) der empirischen Sozialforscherin Prof. Auspurg von der LMU München.
+
+```{r reg}
+
+models = sapply(flats_both_list, calculate_regression)
+```
+
+Das Modell bestätigt die Größenordnung und statistische Signifikanz der Ergebnisse aus der deskriptiven Berechnung.
+
+#### Diskriminierung nach Geschlecht
+
+Analog berechnen wir nun deskriptiv die Diskriminierungsraten und p-Values getrennt nach männlichen und weiblichen Bewerbern:
+
+```{r compare-gender-descriptive}
+
+filter_matches = function (flats_both, key, value) {
+  # filters flats that match value for key
+
+    flats_both %>%
+      filter_(paste0(key, '==', '"', value, '"'))
+  }
+
+calculate_summary = function (key, value) {
+  # calculates individual summary for flats that match value for key
+  
+  flats_both_list_subset = lapply(flats_both_list, filter_matches, key, value)
+  discr_counts_list_subset = lapply(flats_both_list_subset, calculate_counts)
+
+  discr_rates_matrix_subset = sapply(discr_counts_list_subset, calculate_rates)
+  colnames(discr_rates_matrix_subset) = nats_f_long
+  rownames(discr_rates_matrix_subset) = c("NDR_upper", "NDR", "NDR_lower", "GDR_upper", "GDR", "GDR_lower", "OR_lower", "OR", "OR_upper", "RR_lower", "RR", "RR_upper")
+  
+  data.frame(t(discr_rates_matrix_subset)) %>% 
+    rownames_to_column("nationality") %>%
+    mutate(subgroup = value)
+}
+
+wrap_mcnemar = function (key, value) {
+  # calculates mcnemar p-value for discrimination of flats that match value for key (for each nationality)
+  
+  flats_both_list_subset = lapply(flats_both_list, filter_matches, key, value)
+  sapply(flats_both_list_subset, calculate_mcnemar)
+}
+
+plot_discr_per_group = function (key, value1, value2, nats_visible) {
+  # plots the NDRs for the two groups with value1 and value2 as key
+  
+  summary = calculate_summary(key, value1) %>%
+    union(calculate_summary(key, value2)) %>%
+    arrange(nationality)
+  
+  ggplot(
+      summary %>% filter(nationality %in% nats_visible), 
+      aes(x = nationality, y = NDR, fill = subgroup)) + 
+    geom_bar(
+      position=position_dodge(), 
+      stat = "identity",
+      colour = "black",
+      size = .3) +
+    geom_text(
+      aes(x = nationality, y = NDR, label = paste0(round(NDR, 0), "%")), 
+      colour="#333333",
+      position = position_dodge(width = 1),
+      vjust = -0.5) +
+    geom_errorbar(
+      aes(ymin = NDR_lower, ymax = NDR_upper),
+      size = .3,
+      width = .2,
+      position=position_dodge(.9)) +
+    xlab("Nationalität") +
+    ylab("Diskriminerung (%)") +
+    scale_fill_hue(
+      name = key,
+      breaks = c(value1, value2),
+      labels = c(value1, value2)) +
+    scale_y_continuous(breaks = 0:20 * 4) +
+    theme_bw()
+}
+
+
+calc_mcnemar_per_group = function (key, value1, value2) {
+  # print(calculate_mcnemar(key, value1))
+  mcnemars =mapply(c, wrap_mcnemar(key, value1), wrap_mcnemar(key, value2), SIMPLIFY = TRUE)
+  colnames(mcnemars) = nats_f_long
+  rownames(mcnemars) = c(value1, value2)
+
+  print("McNemar p-values:")
+  print(mcnemars)
+  cat("\n")
+}
+
+plot_discr_per_group("geschlecht", "männlich", "weiblich", nats_f_long)
+calc_mcnemar_per_group("geschlecht", "männlich", "weiblich")
+```
+
+Ergebnis:
+
+- **Bei Bewerbern mit türkischem Namen gibt es einen Unterschied bzgl. des Geschlechts: Männer werden statistisch signifikant stärker diskriminiert als Frauen – und zwar annähernd doppelt so stark.** Auch bei Bewerbern mit arabisch klingendem Namen ist eine Tendenz hin zu einer stärkeren Benachteiligung von Männern festzustellen.
+
+Erneut sichern wir die Ergebnisse im Modell durch eine logistische Regression ab. Dies passiert auf zwei Wegen. Zunächst rechnen wir ein Modell mit einem Interaktionsterm zwischen der Nationalität und dem zu untersuchenden Merkmal (hier Geschlecht). Dieser sagt uns wie groß eine unterschiedliche Diskriminierung ausfällt und ob der Unterschied statistisch signifikant ist.
+
+
+```{r compare-gender-model-interaction}
+
+calculate_modell = function (key, value, exclude = NULL) {
+  # calculates mixed models for the subset where (key == value) that exclude key from formula
+  
+  flats_both_list_subset = lapply(flats_both_list, filter_matches, key, value)
+  
+  if (is.null(exclude)) {
+    sapply(flats_both_list_subset, calculate_regression, vars_exclude = key)
+  } else {
+    sapply(flats_both_list_subset, calculate_regression, vars_exclude = c(key, exclude))
+  }
+}
+
+print("Modell with interaction term:")
+models = sapply(flats_both_list, calculate_regression, var_interact = "geschlecht", vars_exclude = NULL)
+
+```
+
+Anschließend berechnen wir getrennte Modelle für jede Teilgruppe, sprich Männer und Frauen. Hier sehen wir ob der Effekt der Nationalität auch im Modell für jede Teilgruppe statistisch signifikant ist. Außerdem sind getrennte Modelle hilfreich, da Interaktionseffekte in der logisitischen Regression auch ohne explizite Formulierung zu einem gewissen Grad modelliert werden. Das heißt ein statistisch nicht-signifikanter Effekt des Interaktionseffekt im obigen Modell bedeutet nicht zwangsläufig, dass es keinen signifikanten Unterschied gibt (siehe arabisch).
+
+
+```{r compare-gender-model}
+
+# compare_shares = function (key, value1, value2) {
+#   # calculates the non-model test for statistical difference of NDR between the two groups of value1 and value2 for key
+# 
+#   count_cases_net_discr = function (discr_counts) {
+#     # returns vector with number of cases of net-discrimination and the complementary number of cases
+# 
+#     discr_count_neg = convert_numeric0((discr_counts %>% filter(discr == -1) %>% select(n))[[1]])
+#     discr_count_2 = convert_numeric0((discr_counts %>% filter(discr == 2) %>% select(n))[[1]])
+#     discr_count_pos = convert_numeric0((discr_counts %>% filter(discr == 1) %>% select(n))[[1]])
+#     discr_count_0 = convert_numeric0((discr_counts %>% filter(discr == 0) %>% select(n))[[1]])
+#     discr_count_sum = (discr_counts %>% summarise(sum=sum(n)) %>% select(sum))[[1]]
+# 
+#     discr_count_net = discr_count_pos - discr_count_neg
+# 
+#     print(c(discr_count_sum, discr_count_pos + discr_count_2, discr_count_neg + discr_count_2))
+# 
+#     # 3-Felder-Tafel
+#     c(discr_count_net, discr_count_sum - discr_count_net - discr_count_0)
+#     # 4-Felder-Tafel
+#     # c(discr_count_net, discr_count_sum - discr_count_net)
+#   }
+# 
+#   calculate_list_pos_neg = function (value) {
+#     # returns the result of count_cases_net_discr in list with an entry for each nationality
+# 
+#     print(value)
+# 
+#     flats_both_list_subset = lapply(flats_both_list, filter_matches, key, value)
+#     discr_counts_list_subset = lapply(flats_both_list_subset, calculate_counts)
+# 
+#     lapply(discr_counts_list_subset, count_cases_net_discr)
+#   }
+#   
+#   list_subgroup1 = calculate_list_pos_neg(value1)
+#   list_subgroup2 = calculate_list_pos_neg(value2)
+#   
+#   # list of vectors with number of cases of net-discrimination and the complementary number of cases for each subgroup
+#   list_both_subgroups = mapply(c, list_subgroup1, list_subgroup2, SIMPLIFY = FALSE)
+#   
+#   calculate_p_value = function (v) {
+#     # calculates p-value of test of difference of two proportions (counts given in vector v)
+#     
+#       m = matrix(v, nrow = 2, ncol = 2, byrow = TRUE)
+#       prop.test(m, conf.level = 0.95)$p.value
+#   }
+# 
+#   sapply(list_both_subgroups, calculate_p_value)
+# }
+
+
+do_it_all = function (key, value1, value2, collinear_var = NULL) {
+  # calculates McNemar p-values for the discrimination rates, models without interaction, significance test for difference of p-values 
+  
+  # summary = calculate_summary(key, value1) %>%
+  #   union(calculate_summary(key, value2)) %>%
+  #   arrange(nationality)
+  
+  # # print(calculate_mcnemar(key, value1))
+  # mcnemars =mapply(c, wrap_mcnemar(key, value1), wrap_mcnemar(key, value2), SIMPLIFY = TRUE)
+  # colnames(mcnemars) = nats_f_long
+  # rownames(mcnemars) = c(value1, value2)
+  # 
+  # print("McNemar p-values:")
+  # print(mcnemars)
+  # cat("\n")
+  
+  print(paste("Modell for subgroup:", value1))
+  calculate_modell(key, value1, collinear_var)
+
+  print(paste("Modell for subgroup:", value2))
+  calculate_modell(key, value2, collinear_var)
+  
+  TRUE
+  
+  # print("Proportion difference p-values:")
+  # diffs = compare_shares(key, value1, value2)
+  # names(diffs) = nats_f_long
+  # print(diffs)
+  
+  # print("Modell with interaction term:")
+  # models = sapply(flats_both_list, calculate_regression, var_interact = key, vars_exclude = collinear_var)
+  
+  # ggplot(
+  #     summary, 
+  #     aes(x = nationality, y = NDR, fill = subgroup)) + 
+  #   geom_bar(
+  #     position=position_dodge(), 
+  #     stat = "identity",
+  #     colour = "black",
+  #     size = .3) +
+  #   geom_text(
+  #     aes(x = nationality, y = NDR, label = paste0(round(NDR, 1), "%")), 
+  #     colour="#333333",
+  #     position = position_dodge(width = 1),
+  #     vjust = -0.5) +
+  #   geom_errorbar(
+  #     aes(ymin = NDR_lower, ymax = NDR_upper),
+  #     size = .3,
+  #     width = .2,
+  #     position=position_dodge(.9)) +
+  #   xlab("Nationalität") +
+  #   ylab("Netto-Diskriminerung (%)") +
+  #   scale_fill_hue(
+  #     name = key,
+  #     breaks = c(value1, value2),
+  #     labels = c(value1, value2)) +
+  #   scale_y_continuous(breaks = 0:20 * 4) +
+  #   theme_bw()
+}
+
+do_it_all("geschlecht", "männlich", "weiblich")
+```
+
+#### Diskriminierung nach Organisationsform
+
+Die Auswertung der Diskriminierung nach Geschlecht lässt sich analog auf die Organisationsform des Vermieters der angebotenen Wohnungen übertragen:
+
+```{r compare-orga-descriptive}
+
+plot_discr_per_group("orga", "company", "private", nats_f_long)
+calc_mcnemar_per_group("orga", "company", "private")
+```
+
+Ergebnis: 
+
+- **Privatanbieter diskriminieren stärker als professionelle Anbieter von Wohnungen.** Statistisch signifikant ist der Unterschied bei italienischen und polnischen Bewerbern.
+
+```{r compare-orga-model}
+
+print("Modell with interaction term:")
+models = sapply(flats_both_list, calculate_regression, var_interact = "orga", vars_exclude = NULL)
+
+do_it_all("orga", "company", "private")
+```
+
+Auch hier bestätigen die Modelle die Ergebnisse der deskriptiven Auswertung.
+
+<!-- #### Diskriminierung nach Geografie -->
+
+
+<!-- ```{r compare-geography} -->
+
+<!-- plot_discr_per_group("geography", "west", "ost", nats_f_long) -->
+<!-- ``` -->
+
+<!-- - **Polnische Bewerber werden in Westdeutschland stärker diskriminiert als in Ostdeutschland (inkl. Berlin).** Bei den übrigen Nationalitäten ist der Unterschied zwischen West und Ost deutlich geringer und statistisch nicht signifikant. -->
+
+
+####**Anteil positiver Rückmeldungen**
+Betrachtet man nur den Anteil an Anfragen, auf die die jeweilige Person zu einem Besichtigungstermin eingeladen wurde oder einen solchen in Aussicht gestellt bekam, zeigt sich folgendes Bild:
+
+```{r positive_per_person}
+
+# Um den Anteil aller tendenziell positiven Antworten (Kategorie 1+2) an allen gesendeten Mails zu berechnen filtern wir diejenigen Fälle aus, in denen die selbe Person mehrfach dieselbse Wohnung angeschreiben hat. Falls bei uns für eine Person und eine Wohnung mehrere verschiedene Antworten eingegangen sind (Meinung geändert, Newsletter, Einladung nachdem vorher nur eine automatisierte Posteingangs-Mail vorlag), behalten wir nur die positivste.
+mails_meta_positive = mails_meta %>% 
+  filter(category <= 2) %>% 
+  distinct(link, person, city, migrationshintergrund, run, herkunft, geschlecht, typ, orga)
+
+confirmations_per_person = confirmations_meta_unique %>% count(person)
+positive_per_person = mails_meta_positive %>% count(person)
+
+share_positive_per_person = left_join(confirmations_per_person, positive_per_person, by=c("person")) %>%
+  rename(count_positive = n.y, count_total = n.x) %>% 
+  mutate(share = count_positive / count_total) %>%
+  rowwise() %>% 
+  mutate(lower = prop.test(count_positive, count_total)$conf.int[1]) %>% 
+  mutate(upper = prop.test(count_positive, count_total)$conf.int[2]) %>% 
+  select(person, share, lower, upper) %>% 
+  left_join(persons, by=c("person" = "mail_1")) %>% 
+  unite(migrationshintergrund_typ, migrationshintergrund, typ, sep="_")
+
+ggplot(share_positive_per_person) +
+  geom_bar(aes(x=reorder(name, share, max), y = share, fill = migrationshintergrund_typ), stat='identity') +
+  geom_errorbar(aes(x=reorder(name, share, max), ymin=lower, ymax=upper),
+                  size=.3,    # Thinner lines
+                  width=.2,
+                  position=position_dodge(.9)) +
+  xlab("") +
+  ylab("Positive Rückmeldungen (%)") +
+  geom_text(aes(x=name, share, y=share, 
+            label= paste0(round(share *100,1), "%")), nudge_y=-0.018, colour="white") +
+  coord_flip() + 
+  scale_fill_manual(name="",
+            breaks=c("ja_normal",
+                  "nein_normal",
+                  "nein_extreme positive",
+                  "nein_extreme negative"),
+            values=c("ja_normal" = "#f69b69", 
+                 "nein_normal" = "#555555",
+                 "nein_extreme positive" = "#1a9641",
+                 "nein_extreme negative" = "#d7191c"),
+            labels=c("Migrationshintergrund",
+                  "kein Migrationshintergrund",
+                  "Extremprofil - positiv",
+                  "Extremprofil - negativ")) +
+  theme(axis.ticks.x=element_blank(), axis.text.x=element_blank()) # + 
+  # labs(subtitle="Anteil Anfragen, auf die die jeweilige Person zu einem Besichtigungstermin eingeladen wurde\n oder einen solchen in Aussicht gestellt bekam", x="", y="")
+```
+
+- **Die Rücklaufquoten der einzelnen Personas bestätigen die Versuchsanordnung.**
+- Dr. Carsten Meier bekommt anteilig die meisten positiven Antworten, Lovis Kuhn landet im hinteren Drittel. Dass er trotz eines laxen Anschreibens ähnlich oder besser als die ausländischen männlichen Bewerber abschneidet, unterstreicht das Ausmaß der Diskriminierung am Mietmarkt. 
+- Interessant ist Daniel Buschle, der im Vergleich zu den anderen deutschen Profilen deutlich abfällt. Das könnte an einer negativen Konnotation seines Namens liegen.
+
+Es gibt unterschiedliche Typen von Vermietern. Während manche Massenbesichtigungen durchführen, laden andere nur wenige Bewerber zu einem Treffen vor Ort ein. Da wir im weiteren Verlauf alle Anfragen einer Personengruppe einfließen lassen, rechnen wir erneut eine logistische Regression mit einen Zufallsfaktor je angeschriebener Wohnung. Dieser modelliert das unterschiedliche Antwortverhalten verschiedener Vermieter. Im Unterschied zu den Diskriminierungsraten verwenden wir für die weiteren Kennzahlen die Ergebnisse aus den Modellen auch in der Berichterstattung.
+
+#### Positive Rückmeldungen nach Geschlecht
+
+Hier führen wir eine logistische Regression durch, die alle uns zur Verfügung stehenden Variablen kontrolliert:
+
+`positive ~ nat + geschlecht + orga + city + run + position_normal + (1 | link)`
+
+Unser Ziel ist es den Effekt, den das Geschlecht auf die Wahrscheinlichkeit einer positiven Rückmeldung hat, ungestört von anderen Faktoren darzustellen. Die Differenz der vorhergesagten Wahrscheinlichkeiten auf eine positive Rückmeldung für Männer und Frauen, entspricht annähernd exakt den AMEs aus dem Regressionsmodell.
+
+
+```{r positive_per_gender, fig.height=2}
+
+dat = confirmations_meta %>%
+  filter(duplicate != TRUE) %>%
+  filter(profile_type == "normal") %>%
+  inner_join(
+    flats %>%
+      select(link, city, orga, order, order_normal, run),
+    by = c("link", "run")) %>%
+  left_join(
+    mails_meta %>%
+      group_by(link, run, person) %>%
+      filter(category == min(category)) %>%
+      slice(1),
+    by = c("link", "run", "person", "herkunft", "city", "orga", "geschlecht")) %>%
+  mutate(
+    nat = herkunft,
+    hintergrund = ifelse(nat == "deutsch", "bio", "mig"),
+    nat = ifelse(nat == "deutsch", "_deutsch", nat),
+    positive = ifelse(is.na(category) | category > 2, 0, 1),
+    city = ifelse(city == "münchen", "_münchen", city)
+  ) %>%
+  select(positive, nat, city, orga, geschlecht, run, link, hintergrund, position_normal)
+
+predict_probabilities = function(model, var_fixed, categories) {
+  # predicts the mean probability for each category of var_fixed referring to model
+
+  predict_mean_probability = function (value) {
+    # predicts the mean probability for var_fixed = value
+    value = paste0("'", value, "'")
+    tmpdat = dat %>% mutate_(.dots = setNames(value, var_fixed))
+    pp = predict(model, newdata = tmpdat, type = "response")
+    mean(pp) * 100
+  }
+
+  positive_shares = as.data.frame(sapply(categories, predict_mean_probability))
+  positive_shares$var_fixed = rownames(positive_shares)
+  colnames(positive_shares)[1] = "share"
+
+  ggplot(positive_shares) +
+    geom_bar(
+      aes(x = reorder(var_fixed, share, max), y = share),
+      stat ='identity') +
+    ylab("Positive Rückmeldungen (%)") +
+    geom_text(
+      aes(x = var_fixed, share, y=share, label = paste0(round(share, 0), "%")),
+      nudge_y = -1,
+      colour="white") +
+    theme(axis.title.y = element_blank()) +
+    coord_flip()
+}
+
+# include both for effect of gender
+m <- glmer(positive ~ nat + geschlecht + orga + city + run + position_normal + (1 | link), data = dat, family = binomial(link=logit), control = glmerControl(optimizer = "bobyqa"), nAGQ = 10)
+
+predict_probabilities(m, "geschlecht", c("männlich", "weiblich"))
+```
+
+
+- **Frauen haben generell eine statistisch signifikant höhere Wahrscheinlichkeit, eine positive Rückmeldung zu erhalten, als Männer – und zwar unabhängig von der Herkunft.**
+
+#### Positive Rückmeldungen nach Organisationsform
+
+Hier ist das Vorgehen analog zur Auswertung nach Geschlecht.
+
+```{r positive_by_landlord, fig.height=2}
+
+predict_probabilities(m, "orga", c("company", "private"))
+```
+
+
+- **Private Anbieter geben generell statistisch signifikant weniger positive Rückmeldungen als professionelle.**
+
+
+#### Positive Rückmeldungen nach Stadt
+
+Auch hier ist das Vorgehen analog zur Auswertung nach Geschlecht. Einziger Unterschied ist, dass wir im Modell hier nicht die Organisationsform der Vermieter kontrollieren: 
+
+`positive ~ nat + geschlecht + city + run + position_normal + (1 | link)`
+
+Wir gehen nämlich davon aus, dass die Verteilung von privaten und gewerblichen Wohnungsanbietern zwischen den Städten unterschiedlich ist und wir diese in unserer Erhebung entsprechend erfasst haben.
+
+
+```{r positive_by_city, fig.height=3}
+
+cities = c("_münchen", "dresden", "dortmund", "magdeburg", "köln", "leipzig", "frankfurt", "nürnberg", "hamburg", "berlin")
+
+m_without_orga <- glmer(positive ~ nat + geschlecht + city + run + position_normal + (1 | link), data = dat, family = binomial(link=logit), control = glmerControl(optimizer = "bobyqa"), nAGQ = 10)
+predict_probabilities(m_without_orga, "city", cities)
+```
+
+- **Die Quote positiver Rückmeldungen unterscheidet sich stark je Stadt. Die deutlich niedrigste Quote weist München auf.** In Berlin und auch in Hamburg erhalten die Bewerber vergleichsweise viele Rückmeldungen.
+
+
+####**Chancenverhältnisse**
+
+Die Chance auf eine positive Rückmeldung ergibt sich aus dem Anteil der positiven Rückmeldungen (p) wie folgt:
+
+`chance = p / (1 - p)`
+
+Das Chancenverhältnis (r) zwischen ausländischen und deutschen Bewerbern ist somit: 
+
+` r = chance_auslaendisch / chance_deutsch`
+
+Es bildet ab, wie schwer es Personen mit ausländischem Namen im Vergleich zu deutschen Bewerbern auf dem Wohnungsmarkt haben. Das Chancenverhältnis ermöglicht es, die vier ausländischen Gruppen zusammenzufassen und Aussagen auf Stadtebene zu treffen. 
+
+Aus den gleichen Gründen wie oben, verwenden wir in der Berichterstattung auch hier die Ergebnisse aus der logistischen Regression. Wir rechnen hier ein Modell, in dem ein Interaktionseffekt zwischen der Stadt und der Frage ob ein zugeschriebener Migrationshintergrund vorliegt:
+
+`positive ~ hintergrund * city + geschlecht + run + position_normal + (1 | link)`
+
+Denn genau das ist ja die Grundannahme, für diese Metrik.
+
+
+```{r odds_german_foreign_city}
+
+m_interact <- glmer(positive ~ hintergrund * city + geschlecht + run + position_normal + (1 | link), data = dat, family = binomial(link=logit), control = glmerControl(optimizer = "bobyqa"), nAGQ = 10)
+
+calculate_discr_indicator = function (var_city, indicator) {
+  # calculate indicator ("OR" | "delta") that indicates discrimination for a city
+
+  tmpdat = dat %>% mutate(city = var_city)
+  jvalues =c("bio", "mig")
+
+  pp = sapply(jvalues, function(j) {
+    # predict the probabilities once for Germans ("bio") and once for foreigners ("mig")
+    tmpdat$hintergrund <- j
+    predict(m_interact, newdata = tmpdat, type = "response")
+  })
+
+  if (indicator == "OR") {
+
+    ratio = (mean(pp[ , 1]) / (1 - mean(pp[ , 1])))/(mean(pp[ , 2]) / (1 - mean(pp[ , 2])))
+    ratio
+  } else if (indicator == "RR") {
+    
+    
+    ratio = (mean(pp[ , 1])) / (mean(pp[ , 2]))
+    ratio
+  } else {
+
+    delta = mean(pp[ , 1]) - mean(pp[ , 2])
+
+    # print(paste("manually calculated AME:", delta, "(mean - mean)"))
+    # print(paste("manually calculated AME:", mean(pp[ , 1] - pp[ , 2]), "(mean - )"))
+    delta
+  }
+}
+
+OR_per_city = as.data.frame(sapply(cities, calculate_discr_indicator, indicator = "OR"))
+OR_per_city$city = rownames(OR_per_city)
+
+# calculate how many percentage the odds of foreigners are lower compared to the odds of Germans
+OR_per_city$share = -(1 - (OR_per_city[1])^-1) * 100
+
+ggplot(OR_per_city) +
+  geom_bar(
+    aes(x = reorder(city, -share), y = share),
+    stat = 'identity') +
+  geom_text(
+    aes(x = city, y = share, label = paste0(round(share, 0), "%")),
+    nudge_y = 2,
+    colour = "white") +
+  # theme(axis.title.y = element_blank()) +
+  coord_flip() + 
+  labs(subtitle = "Lesebeispiel: In München sind die Chancen auf eine positive Rückmeldung für einen ausländischen Bewerber beinahe um die\n Hälfte niedriger als die einer deutschen Person", x = "", y = "Chancenminus (%)")
+```
+
+- **In München haben ausländische Bewerber gegenüber deutschen deutlich geringere Chancen eine positive Rückmeldung zu erhalten als in den übrigen Städten.** Mit einigem Abstand folgt Frankfurt an zweiter Stelle. In Dortmund und den ostdeutschen Städten Magdeburg und Leipzig ist der Chancenunterschied hingegen am geringsten. Aufgrund teilweise niedriger Fallzahlen sind kleine Unterschiede zwischen den Städten nur vorsichtig zu interpretieren.
+
+### Ansprechpartner
+<div class="col2">
+**Bayerischer Rundfunk**  
+[BR Data](mailto:data@br.de)
+
+[Uli Köppen](mailto:ulrike.koeppen@br.de)  
+[Robert Schöffel](mailto:robert.schoeffel@br.de)  
+[Oliver Schnuck](mailto:oliver.schnuck@br.de)
+
+**Spiegel Online**  
+[Ressort Datenjournalismus](mailto:spon.daten@spiegel.de)
+
+[Christina Elmer](mailto:christina.elmer@spiegel.de)  
+[Patrick Stotz](mailto:patrick.stotz@spiegel.de)  
+[Achim Tack](mailto:achim.tack@spiegel.de)
+</div>
