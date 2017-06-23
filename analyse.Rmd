@@ -186,6 +186,18 @@ flats_meta = flats %>%
   left_join(confirmations_meta %>% select(link, run, geschlecht) %>% unique(), by = c("link", "run"))
 ```
 
+```{r write-processed-data}
+
+dir.create("data")
+
+write_csv(flats %>% select(`_id`, link, website, request_time, request_date, request_datetime, flat_meta.price, flat_meta.surface, city, order, orga, run), "data/flats.csv")
+write_csv(persons, "data/persons.csv")
+write_csv(mails %>% select(-flat_id), "data/mails.csv")
+write_csv(confirmations, "data/confirmations.csv")
+```
+
+
+
 <!-- part of data preparation for global analysis only -->
 ```{r filter-units-meta, include = FALSE}
 

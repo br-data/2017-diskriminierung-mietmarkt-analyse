@@ -1,0 +1,15 @@
+herkunft,typ,migrationshintergrund,geschlecht,name,mail_1,kuerzel
+deutsch,normal,nein,männlich,Daniel Buschle,danielbuschle2@gmail.com,g
+deutsch,normal,nein,weiblich,Nina Weiss,nina.c.weiss@gmail.com,g
+türkisch,normal,ja,männlich,Haimt Yilmaz,hamit.k.yilmaz@gmail.com,t
+türkisch,normal,ja,weiblich,Aylin Demirci,aylindemirci132@gmail.com,t
+italienisch,normal,ja,männlich,Stefano Loguercio,stef.loguercio@gmail.com,i
+italienisch,normal,ja,weiblich,Vittoria di Lauro,vittilauro@gmail.com,i
+arabisch,normal,ja,männlich,Ismail Hamed,ismailbhamed@gmail.com,a
+arabisch,normal,ja,weiblich,Maryam Abedini,ma03592@gmail.com,a
+polnisch,normal,ja,männlich,Mikolaj Janowski,janowski.miko@gmail.com,p
+polnisch,normal,ja,weiblich,Milena Adamowicz,madameowicz@gmail.com,p
+deutsch,extreme positive,nein,männlich,Carsten Meier,carsten.j.meier@gmail.com,y
+deutsch,extreme negative,nein,männlich,Lovis Kuhn,loviskuhn@gmail.com,x
+deutsch,normal,nein,männlich,Stephan Braun,stephanbraun19@gmail.com,g
+deutsch,normal,nein,weiblich,Hanna Berg,hanna.c.berg@gmail.com,g
