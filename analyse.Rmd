@@ -37,8 +37,18 @@ library(PropCIs)
   }
 </style>
 
-<!-- read in data -->
-```{r read_data perform joins, include = FALSE}
+
+# **Diskriminierung auf dem deutschen Wohnungsmarkt**
+
+### Das Experiment
+Im Juni und September 2016 haben wir uns in einem automatisierten Prozess auf `r nrow(flats)` Wohnungsannoncen in `r tools::toTitleCase(unique(mails_meta[!is.na(mails_meta$city),]$city))` beworben. Die Absender der `r nrow(confirmations)` E-Mail-Anfragen unterschieden sich lediglich im Namen, der auf einen deutschen, arabischen, türkischen, italienischen oder polnischen Hintergrund schließen lässt. In ihren sonstigen Eigenschaften waren die Personen identisch – zwischen 20 und 30 Jahre alt, Berufseinsteiger in einer Agentur, mit Anschreiben in perfektem Deutsch. Männer und Frauen waren gleich häufig vertreten.
+
+Auf die Anfragen erhielten wir rund 8000 Antworten, die wir händisch in Kategorien einsortierten. Nur so konnten wir sicher erfassen, ob ein Bewerber zur Wohnungsbesichtigung eingeladen wurde oder nicht. Das Ergebnis ist ein Datensatz, der ein Schlaglicht auf den deutschen Mietwohnungsmarkt wirft, und zugleich groß genug ist, um signifikante Unterschiede zwischen Nationalitäten, Geschlechtern und Städten zu zeigen. 
+
+
+### Datensatzbeschreibung
+
+```{r read_data perform joins, include=TRUE}
 
 persons = read_excel("input/persons.xlsx") %>% 
   # modifying value "extreme", since aggregation of both extremes doesn't make sense
@@ -186,7 +196,10 @@ flats_meta = flats %>%
   left_join(confirmations_meta %>% select(link, run, geschlecht) %>% unique(), by = c("link", "run"))
 ```
 
-```{r write-processed-data}
+
+Im Kern besteht der Datensatz aus vier Tabellen:  
+
+```{r write-processed-data, include=TRUE}
 
 dir.create("data")
 
@@ -196,10 +209,25 @@ write_csv(mails %>% select(-flat_id), "data/mails.csv")
 write_csv(confirmations, "data/confirmations.csv")
 ```
 
+- **persons.xlsx** - Die 14 fiktiven Personen, die für die Kontaktaufname genutzt wurden sowie deren Name, Geschlecht, Herkunft und Mail-Adresse.
+- **confirmations.csv** - Übersicht über alle im Lauf des Versuchs erfolgreich angefragten Wohnungsannoncen. Beinhaltet u.A. die anfragende Person, den Link zur Annonce sowie den zeitlichen Abstand zwischen den Anfragen mit den verschiedenen Profilen.
+- **flats.csv** - Beinhaltet neben dem Link und dem Zeitstempel Meta-Daten zu den angefragten Wohnungen. Aus Datenschutzgründen werden Informationen, die Rückschlüsse auf einzelne Wohnungen oder Inserenten zulassen (Ansprechpartner, Adresse, Betreff, Telefonnumer) nicht veröffentlicht.
+- **mails.xlsx** - Die Kategorisierung der empfangenen Emails. Es wurde folgendes Codebuch verwendet:
+
+| Kategorie | Umschreibung |
+|:-----:|:-----|
+| 1 | positv: Zusage eines Besichtigungstermins |
+| 2 | positive Tendenz: Ein Besichtigungstermin wird in Aussicht gestellt|
+| 3 | Kenntnise: Anfrage wurde zur Kenntnis genommen. Enthält keine Wertung |
+| 4 | negativ: Absage |
+| 5 | Wohung nicht verwertbar: z.B. Seniorenwohnanlage, WG-Zimmer |
+| 6 | Mail nicht verwertbar: keine relevante Aussage (z.B. Newsletter) |
+| 7 | Makler-Masche: Versuchtes Umgehen des Besteller-Prinzips |
+| 8 | Spam/Scam: Ohne Aussage hinsichtlich der Diskriminierung |
 
 
 <!-- part of data preparation for global analysis only -->
-```{r filter-units-meta, include = FALSE}
+```{r filter-units-meta, include=TRUE}
 
 # black-list of mails because of category
 mails_cat578 = mails_meta %>%
@@ -223,35 +251,8 @@ confirmations_meta_unique = confirmations_meta %>%
   inner_join(flats %>% select(link, run, orga, city, order), by = c("link", "run"))
 ```
 
-
-
-# **Diskriminierung auf dem deutschen Wohnungsmarkt**
-
-### Das Experiment
-Im Juni und September 2016 haben wir uns in einem automatisierten Prozess auf `r nrow(flats)` Wohnungsannoncen in `r tools::toTitleCase(unique(mails_meta[!is.na(mails_meta$city),]$city))` beworben. Die Absender der `r nrow(confirmations)` E-Mail-Anfragen unterschieden sich lediglich im Namen, der auf einen deutschen, arabischen, türkischen, italienischen oder polnischen Hintergrund schließen lässt. In ihren sonstigen Eigenschaften waren die Personen identisch – zwischen 20 und 30 Jahre alt, Berufseinsteiger in einer Agentur, mit Anschreiben in perfektem Deutsch. Männer und Frauen waren gleich häufig vertreten.
-
-Auf die Anfragen erhielten wir rund 8000 Antworten, die wir händisch in Kategorien einsortierten. Nur so konnten wir sicher erfassen, ob ein Bewerber zur Wohnungsbesichtigung eingeladen wurde oder nicht. Das Ergebnis ist ein Datensatz, der ein Schlaglicht auf den deutschen Mietwohnungsmarkt wirft, aber zugleich groß genug ist, um signifikante Unterschiede zwischen Nationalitäten, Geschlechtern und Städten zu zeigen. 
-
-### Datensatzbeschreibung
-Im Kern besteht der Datensatz aus vier Tabellen:  
-
-- **persons.xlsx** - Die 14 fiktiven Personen, die für die Kontaktaufname genutzt wurden sowie deren Name, Geschlecht, Herkunft und Mail-Adresse.
-- **confirmations.csv** - Übersicht über alle im Lauf des Versuchs erfolgreich angefragten Wohnungsannoncen. Beinhaltet u.A. die anfragende Person, den Link zur Annonce sowie den zeitlichen Abstand zwischen den Anfragen mit den verschiedenen Profilen.
-- **flats.csv** - Beinhaltet die Meta-Daten zu den angefragten Wohnungen. Aus Datenschutzgründen werden Informationen, die Rückschlüsse auf einzelne Wohnungen oder Inserenten zulassen (Ansprechpartner, Adresse, Betreff, Telefonnumer) nicht veröffentlicht.
-- **mails.xlsx** - Die Kategorisierung der empfangenen Emails. Es wurde folgendes Codebuch verwendet:
-
-| Kategorie | Umschreibung |
-|:-----:|:-----|
-| 1 | positv: Zusage eines Besichtigungstermins |
-| 2 | positive Tendenz: Ein Besichtigungstermin wird in Aussicht gestellt|
-| 3 | Kenntnise: Anfrage wurde zur Kenntnis genommen. Enthält keine Wertung |
-| 4 | negativ: Absage |
-| 5 | Wohung nicht verwertbar: z.B. Seniorenwohnanlage, WG-Zimmer |
-| 6 | Mail nicht verwertbar: keine relevante Aussage (z.B. Newsletter) |
-| 7 | Makler-Masche: Versuchtes Umgehen des Besteller-Prinzips |
-| 8 | Spam/Scam: Ohne Aussage hinsichtlich der Diskriminierung |
-
 Für die folgenden Analysen wurden die einzelnen Datensätze jeweils gejoint (Namenssufix "_meta"). So enthält der data frame *mails_meta* nicht nur die Informationen zu den klassifizierten Antwortschreiben sondern auch die Personenmerkmale des fiktiven Charakters, der die Bewerbung gesendet hat sowie Metainformationen zur angefragten Wohnung. Entfernt wurden aus diesen Datensätzen zudem sämtliche Wohnungsannoncen, registierte Anfragen sowie eingegange Antworten von Anbietern, die uns im Lauf der Auswertung nicht verwertbare Antworten zugesendet habe (Kategorien 5,7 & 8).
+
 
 ### Berechnungen
 
@@ -259,7 +260,7 @@ Für die folgenden Analysen wurden die einzelnen Datensätze jeweils gejoint (Na
 
 Neben deskriptiven Auswertungen führen wir Regressionen durch um Erstere entweder abzusichern oder die Ergebnisse aus dem Modell direkt in der Berichterstattung zu verwenden. Ein Ziel ist es dabei, den Effekt einer im Interesse stehenden Variable von Verzerrungen durch andere Faktoren zu separieren (sprich diese zu "kontrollieren").
 
-Zur Methode: Wir rechnen eine logistische Regression mit einem Zufallsfaktor (Random Intercept) je ausgeschriebener Wohnung. Wir modellieren damit die Auswirkungen verschiedener Faktoren auf die Wahrscheinlichkeit, eine positive Rückmeldung auf eine Wohnungsanfrage zu erhalten. Die resultierenden Koeffizienten einer logistischen Regression beziehen sich auf logarithmierte Chancen (logits) und sind inhaltlich kaum interpretierbar. Daher verwenden wir in der Auswertung Average Marginal Effects (AMEs): Sie beschreiben den durchschnittlichen Effekt eines Faktors auf die Wahrscheinlichkeit eine positiven Antwort zu erhalten.
+Zur Methode: Wir rechnen eine logistische Regression mit einem Zufallsfaktor (Random Intercept) je ausgeschriebener Wohnung. Wir modellieren damit die Auswirkungen verschiedener Faktoren auf die Wahrscheinlichkeit, eine positive Rückmeldung auf eine Wohnungsanfrage zu erhalten. Die resultierenden Koeffizienten einer logistischen Regression beziehen sich auf logarithmierte Chancen (logits) und sind inhaltlich nur schwer interpretierbar. Daher verwenden wir in der Auswertung Average Marginal Effects (AMEs): Sie beschreiben den durchschnittlichen Effekt eines Faktors auf die Wahrscheinlichkeit eine positiven Antwort zu erhalten.
 
 ```{r log-regr}
 
@@ -374,7 +375,7 @@ calculate_regression = function(flats_both, var_interact = NULL, vars_exclude = 
 Zur Implementierung: Die Berechnung der marginalen Effekte im logistischen Modell ist dem Working Paper [Simple Logit and Probit Marginal Effects in R](http://researchrepository.ucd.ie/bitstream/handle/10197/3404/WP11_22.pdf) von Alan Fernihough entnommen. Die Berechnung der Standardfehler wurde korrigiert und wird nach der [Methode von Krinsky and Robb](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3976195/) berechnet.
 
 ####**Diskriminierung**
-Am klarsten lässt sich Diskriminierung erkennen, wenn unsere fiktiven Personen bei der Bewerbung auf eine identische Wohnung unterschiedliche Antworten erhalten haben. Wir betrachten hier also Wohnungen, die von einer Persona der jeweiligen Minderheit (arabisch, italienisch, polnisch, türkisch) und einer deutschen Persona erfolgreich angeschrieben wurde. Die Zahl auswertbarer Wohnungen je Nationalität beträgt: 
+Am klarsten lässt sich Diskriminierung erkennen, wenn unsere fiktiven Personen bei der Bewerbung auf eine identische Wohnung unterschiedliche Antworten erhalten haben. Als Grundgesamtheit betrachten wir also Wohnungen, die von einer Persona der jeweiligen Minderheit (arabisch, italienisch, polnisch, türkisch) und einer deutschen Persona erfolgreich angeschrieben wurde. Die Zahl auswertbarer Wohnungen je Nationalität beträgt: 
 
 ```{r counts-per-nat}
 
@@ -445,14 +446,14 @@ names(counts_flats_both) = nats_f_long
 counts_flats_both
 ```
 
-Jede dieser Wohnungen lässt sich in folgende Kategorien einordnen:
+Jede dieser Wohnungen lässt sich in eine der folgenden Kategorien einordnen:
 
 - np: Die deutsche Persona wird benachteiligt (-1)
 - nn: Beide Personas erhalten negative Antwort (0)
 - pn: Die Minderheit wird benachteiligt (1)
 - pp: Beide Personas erhalten positive Antwort (2)
 
-Für die vier untersuchten Minderheiten sieht das folgendermaßen aus:
+Für die vier untersuchten Minderheiten sieht das so aus:
 
 ```{r discr-per-nat}
 
@@ -479,7 +480,9 @@ flats_both_list = lapply(flats_both_list, function(flats_both) { flats_both %>% 
 
 Neben einer Bevorzugung der deutschen Bewerber (pn) gibt es ebenso Fälle, in denen nur die Person mit ausländisch klingendem Namen eine positive Antwort erhält (np). Das kann eine bewusste Entscheidung des Vermieters sein. Oder schlicht damit zusammenhängen, dass der deutsche Bewerber später angeschrieben und der Vermieter die Anfrage gar nicht erst gelesen hat.
 
-Um das tatsächliche Ausmaß der Diskriminierung von Personen mit ausländischem Namen nicht zu überschätzen, berücksichtigen wir auch diese Fälle bei der Berechnung der Diskriminierungsrate: `NDR = (pn - np) / (pp + pn + np)`
+Um das tatsächliche Ausmaß der Diskriminierung von Personen mit ausländischem Namen nicht zu überschätzen, fließen auch diese Fälle in die Berechnung der Diskriminierungsrate ein. Indem wir diese Fälle (np) von den Fällen zugunsten der deutschen Bewerber (pn) abziehen, folgen wir einem [Working Paper](https://cms.uni-konstanz.de/soziologie/professuren/prof-dr-thomas-hinz/forschung/aktuelle-forschungsprojekte/ethnische-diskriminierung/ethnic-discrimination/) der empirischen Sozialforscherin Prof. Auspurg von der LMU München. Wir berechnen die Diskriminierungsrate folgendermaßen: `NDR = (pn - np) / (pp + pn + np)`
+
+Wir setzen also die Fälle von Ungleichbehandlung ins Verhältnis zur Zahl der Wohnungen, deren Vermieter auf mindestens eine unserer beiden Anfragen positiv reagiert haben. Fälle, in denen keine unserer Personen eine Zusage erhalten hat (nn), berücksichtigen wir nicht bei der Ermittlung der Diskriminierungsrate. Sie zeigen, wie angespannt der Wohnungsmarkt ist. Hier eine tabellarische Darstellung der Ergebnisse:
 
 <!-- (siehe Working Paper [Hinz, Auspurg, Schmid 2011](https://cms.uni-konstanz.de/soziologie/professuren/prof-dr-thomas-hinz/forschung/aktuelle-forschungsprojekte/ethnische-diskriminierung/ethnic-discrimination/)). -->
 
@@ -506,29 +509,17 @@ calculate_rates = function(discr_counts) {
   
   # 3-Felder-Tafel
   discr_count_0 = 0
-  # 4-Felder-Tafel
+  # # 4-Felder-Tafel
   # discr_count_0 = (discr_counts %>% filter(discr == 0) %>% select(n))[[1]]
 
-  # # 3-Felder-Tafel
+  # 3-Felder-Tafel
   discr_count_sum = discr_count_neg + discr_count_pos + discr_count_2
-  # 4 Felder-Tafel
+  # # 4 Felder-Tafel
   # discr_count_sum = (discr_counts %>% summarise(sum = sum(n)) %>% select(sum))[[1]]
   
   table_1_response_var = matrix(c(discr_count_pos + discr_count_2, discr_count_neg + discr_count_2, discr_count_0 + discr_count_neg, discr_count_0 + discr_count_pos), nrow = 2)
   colnames(table_1_response_var) = c("positive", "negative")
   rownames(table_1_response_var) = c("german", "foreign")
-  
-  # calculate Odds Ratio + confidence interval
-  or_vector = orscoreci(table_1_response_var[1, 1],sum(table_1_response_var[1, ]), table_1_response_var[2, 1],sum(table_1_response_var[2, ]), 0.95)$conf.int
-  or_lower= or_vector[1]
-  or = (table_1_response_var[1, 1] * table_1_response_var[2, 2]) / (table_1_response_var[1, 2] * table_1_response_var[2, 1])
-  or_upper = or_vector[2]
-  
-  # calculate Risk Ratio + confidence interval
-  rr_vector = riskscoreci(table_1_response_var[1, 1],sum(table_1_response_var[1, ]), table_1_response_var[2, 1],sum(table_1_response_var[2, ]), 0.95)$conf.int
-  rr_lower= rr_vector[1]
-  rr = (table_1_response_var[1, 1] / sum(table_1_response_var[1, ])) / (table_1_response_var[2, 1] / sum(table_1_response_var[2, ]))
-  rr_upper = rr_vector[2]
   
   # calculate gross discrimination rate
   gdr = discr_count_pos / discr_count_sum
@@ -537,18 +528,19 @@ calculate_rates = function(discr_counts) {
   # calculate net disrimination rate
   ndr = gdr - (discr_count_neg / discr_count_sum)
   ndr_interval = prop.test(table_1_response_var, conf.level = 0.95)$conf.int
+  # see: http://www.r-tutor.com/elementary-statistics/inference-about-two-populations/comparison-two-population-proportions
   # alternative to calculate conf-int: t.test(flats_both$positive_req, flats_both$positive_ref)
 
-  c(sapply(c(ndr_interval[2], ndr, ndr_interval[1], gdr_interval[2], gdr, gdr_interval[1]), share_to_percent), or_lower, or, or_upper, rr_lower, rr, rr_upper)
+  sapply(c(ndr_interval[2], ndr, ndr_interval[1], gdr_interval[2], gdr, gdr_interval[1]), share_to_percent)
 }
 
 discr_rates_matrix = sapply(discr_counts_list, calculate_rates)
 colnames(discr_rates_matrix) = nats_f_long
-rownames(discr_rates_matrix) = c("NDR_upper", "NDR", "NDR_lower", "GDR_upper", "GDR", "GDR_lower", "OR_lower", "OR", "OR_upper", "RR_lower", "RR", "RR_upper")
+rownames(discr_rates_matrix) = c("NDR_upper", "NDR", "NDR_lower", "GDR_upper", "GDR", "GDR_lower")
 discr_rates_matrix[1:3, ]
 ```
 
-Wir setzen also die Fälle von Ungleichbehandlung ins Verhältnis zur Zahl der Wohnungen, deren Vermieter auf mindestens eine unserer beiden Anfragen positiv reagiert haben. Fälle, in denen keine unserer Personen eine Zusage erhalten hat (nn), berücksichtigen wir nicht bei der Ermittlung der Diskriminierungsrate. Sie zeigen vielmehr, wie angespannt der Wohnungsmarkt ist. Hier eine grafische Darstellung der Ergebnisse:
+Die Ober- und Untergrenze des 95%-Konfidenzintervalls wurden mit Hilfe eine Tests der Differenz zweier Anteilswerter normalverteilter Populationen berechnet. Hier eine grafische Darstellung der Ergebnisse:
 
 
 ```{r rates-per-nat-plot}
@@ -611,14 +603,14 @@ Ergebnis:
 - **Bewerber mit ausländisch klingendem Namen werden auf dem Mietmarkt gegenüber deutschen Bewerbern deutlich und statistisch signifikant benachteiligt.**
 - **In jedem vierten Fall, in dem ein Deutscher eine Einladung zu einer Besichtigung erhält, werden Menschen mit türkischem oder arabischem Namen übergangen.** Damit werden sie mehr als doppelt so stark diskriminiert wie italienische oder polnische Bewerber. Diese werden ebenfalls statistisch signifikant benachteiligt, allerdings mit einer deutlich niedrigeren Häufigkeit.
 
-Wir sichern die Diskriminierungsraten mit einer logistischen Regression ab, um andere Faktoren wie die Reihenfolge der Anschreiben oder den Run zu kontrollieren. Mit diesem Vorgehen beziehen wir uns auf eine [Studie](http://www.sciencedirect.com/science/article/pii/S1051137717300037) der empirischen Sozialforscherin Prof. Auspurg von der LMU München.
+Wir sichern die Diskriminierungsraten mit einer logistischen Regression ab, um andere Faktoren wie die Reihenfolge der Anschreiben zu kontrollieren. Oder ob eine Anfrage dem ersten (Juni) oder zweiten Durchlauf (September) zuzuordnen ist. Mit diesem Vorgehen beziehen wir uns auf eine [Studie](http://www.sciencedirect.com/science/article/pii/S1051137717300037) ebenfalls von Prof. Auspurg.
 
 ```{r reg}
 
 models = sapply(flats_both_list, calculate_regression)
 ```
 
-Das Modell bestätigt die Größenordnung und statistische Signifikanz der Ergebnisse aus der deskriptiven Berechnung.
+Die Modelle bestätigen die Ergebnisse aus der deskriptiven Berechnung und deren statistische Siginifikanz.
 
 #### Diskriminierung nach Geschlecht
 
@@ -641,7 +633,7 @@ calculate_summary = function (key, value) {
 
   discr_rates_matrix_subset = sapply(discr_counts_list_subset, calculate_rates)
   colnames(discr_rates_matrix_subset) = nats_f_long
-  rownames(discr_rates_matrix_subset) = c("NDR_upper", "NDR", "NDR_lower", "GDR_upper", "GDR", "GDR_lower", "OR_lower", "OR", "OR_upper", "RR_lower", "RR", "RR_upper")
+  rownames(discr_rates_matrix_subset) = c("NDR_upper", "NDR", "NDR_lower", "GDR_upper", "GDR", "GDR_lower")
   
   data.frame(t(discr_rates_matrix_subset)) %>% 
     rownames_to_column("nationality") %>%
@@ -692,6 +684,7 @@ plot_discr_per_group = function (key, value1, value2, nats_visible) {
 
 
 calc_mcnemar_per_group = function (key, value1, value2) {
+  
   # print(calculate_mcnemar(key, value1))
   mcnemars =mapply(c, wrap_mcnemar(key, value1), wrap_mcnemar(key, value2), SIMPLIFY = TRUE)
   colnames(mcnemars) = nats_f_long
@@ -708,7 +701,7 @@ calc_mcnemar_per_group("geschlecht", "männlich", "weiblich")
 
 Ergebnis:
 
-- **Bei Bewerbern mit türkischem Namen gibt es einen Unterschied bzgl. des Geschlechts: Männer werden statistisch signifikant stärker diskriminiert als Frauen – und zwar annähernd doppelt so stark.** Auch bei Bewerbern mit arabisch klingendem Namen ist eine Tendenz hin zu einer stärkeren Benachteiligung von Männern festzustellen.
+- **Bei Bewerbern mit türkischem Namen gibt es einen Unterschied bzgl. des Geschlechts: Männer werden statistisch signifikant stärker diskriminiert (ggü deutschen Bewerbern) als Frauen (gegenüber deutschen Bewerberinnen) – und zwar annähernd doppelt so stark.** Auch bei Bewerbern mit arabisch klingendem Namen ist diese Tendenz festzustellen.
 
 Erneut sichern wir die Ergebnisse im Modell durch eine logistische Regression ab. Dies passiert auf zwei Wegen. Zunächst rechnen wir ein Modell mit einem Interaktionsterm zwischen der Nationalität und dem zu untersuchenden Merkmal (hier Geschlecht). Dieser sagt uns wie groß eine unterschiedliche Diskriminierung ausfällt und ob der Unterschied statistisch signifikant ist.
 
@@ -732,122 +725,24 @@ models = sapply(flats_both_list, calculate_regression, var_interact = "geschlech
 
 ```
 
-Anschließend berechnen wir getrennte Modelle für jede Teilgruppe, sprich Männer und Frauen. Hier sehen wir ob der Effekt der Nationalität auch im Modell für jede Teilgruppe statistisch signifikant ist. Außerdem sind getrennte Modelle hilfreich, da Interaktionseffekte in der logisitischen Regression auch ohne explizite Formulierung zu einem gewissen Grad modelliert werden. Das heißt ein statistisch nicht-signifikanter Effekt des Interaktionseffekt im obigen Modell bedeutet nicht zwangsläufig, dass es keinen signifikanten Unterschied gibt (siehe arabisch).
+Anschließend berechnen wir getrennte Modelle für jede Teilgruppe, sprich Männer und Frauen. Hier sehen wir ob der Effekt der Nationalität auch im Modell für jede Teilgruppe statistisch signifikant ist. Außerdem sind getrennte Modelle hilfreich, da Interaktionseffekte in der logisitischen Regression auch ohne explizite Formulierung zu einem gewissen Grad implizit modelliert werden. Das heißt ein statistisch nicht-signifikanter Interaktionseffekt im obigen Modell bedeutet nicht zwangsläufig, dass es keinen signifikanten Unterschied gibt (siehe arabisch).
 
 
 ```{r compare-gender-model}
 
-# compare_shares = function (key, value1, value2) {
-#   # calculates the non-model test for statistical difference of NDR between the two groups of value1 and value2 for key
-# 
-#   count_cases_net_discr = function (discr_counts) {
-#     # returns vector with number of cases of net-discrimination and the complementary number of cases
-# 
-#     discr_count_neg = convert_numeric0((discr_counts %>% filter(discr == -1) %>% select(n))[[1]])
-#     discr_count_2 = convert_numeric0((discr_counts %>% filter(discr == 2) %>% select(n))[[1]])
-#     discr_count_pos = convert_numeric0((discr_counts %>% filter(discr == 1) %>% select(n))[[1]])
-#     discr_count_0 = convert_numeric0((discr_counts %>% filter(discr == 0) %>% select(n))[[1]])
-#     discr_count_sum = (discr_counts %>% summarise(sum=sum(n)) %>% select(sum))[[1]]
-# 
-#     discr_count_net = discr_count_pos - discr_count_neg
-# 
-#     print(c(discr_count_sum, discr_count_pos + discr_count_2, discr_count_neg + discr_count_2))
-# 
-#     # 3-Felder-Tafel
-#     c(discr_count_net, discr_count_sum - discr_count_net - discr_count_0)
-#     # 4-Felder-Tafel
-#     # c(discr_count_net, discr_count_sum - discr_count_net)
-#   }
-# 
-#   calculate_list_pos_neg = function (value) {
-#     # returns the result of count_cases_net_discr in list with an entry for each nationality
-# 
-#     print(value)
-# 
-#     flats_both_list_subset = lapply(flats_both_list, filter_matches, key, value)
-#     discr_counts_list_subset = lapply(flats_both_list_subset, calculate_counts)
-# 
-#     lapply(discr_counts_list_subset, count_cases_net_discr)
-#   }
-#   
-#   list_subgroup1 = calculate_list_pos_neg(value1)
-#   list_subgroup2 = calculate_list_pos_neg(value2)
-#   
-#   # list of vectors with number of cases of net-discrimination and the complementary number of cases for each subgroup
-#   list_both_subgroups = mapply(c, list_subgroup1, list_subgroup2, SIMPLIFY = FALSE)
-#   
-#   calculate_p_value = function (v) {
-#     # calculates p-value of test of difference of two proportions (counts given in vector v)
-#     
-#       m = matrix(v, nrow = 2, ncol = 2, byrow = TRUE)
-#       prop.test(m, conf.level = 0.95)$p.value
-#   }
-# 
-#   sapply(list_both_subgroups, calculate_p_value)
-# }
-
-
-do_it_all = function (key, value1, value2, collinear_var = NULL) {
-  # calculates McNemar p-values for the discrimination rates, models without interaction, significance test for difference of p-values 
+calculate_separate_models = function (key, value1, value2, collinear_var = NULL) {
+  # calculates models for each each subroup (value1 and value2) without interaction-term
   
-  # summary = calculate_summary(key, value1) %>%
-  #   union(calculate_summary(key, value2)) %>%
-  #   arrange(nationality)
-  
-  # # print(calculate_mcnemar(key, value1))
-  # mcnemars =mapply(c, wrap_mcnemar(key, value1), wrap_mcnemar(key, value2), SIMPLIFY = TRUE)
-  # colnames(mcnemars) = nats_f_long
-  # rownames(mcnemars) = c(value1, value2)
-  # 
-  # print("McNemar p-values:")
-  # print(mcnemars)
-  # cat("\n")
-  
-  print(paste("Modell for subgroup:", value1))
+  print(paste("Models for subgroup:", value1))
   calculate_modell(key, value1, collinear_var)
 
-  print(paste("Modell for subgroup:", value2))
+  print(paste("Models for subgroup:", value2))
   calculate_modell(key, value2, collinear_var)
   
   TRUE
-  
-  # print("Proportion difference p-values:")
-  # diffs = compare_shares(key, value1, value2)
-  # names(diffs) = nats_f_long
-  # print(diffs)
-  
-  # print("Modell with interaction term:")
-  # models = sapply(flats_both_list, calculate_regression, var_interact = key, vars_exclude = collinear_var)
-  
-  # ggplot(
-  #     summary, 
-  #     aes(x = nationality, y = NDR, fill = subgroup)) + 
-  #   geom_bar(
-  #     position=position_dodge(), 
-  #     stat = "identity",
-  #     colour = "black",
-  #     size = .3) +
-  #   geom_text(
-  #     aes(x = nationality, y = NDR, label = paste0(round(NDR, 1), "%")), 
-  #     colour="#333333",
-  #     position = position_dodge(width = 1),
-  #     vjust = -0.5) +
-  #   geom_errorbar(
-  #     aes(ymin = NDR_lower, ymax = NDR_upper),
-  #     size = .3,
-  #     width = .2,
-  #     position=position_dodge(.9)) +
-  #   xlab("Nationalität") +
-  #   ylab("Netto-Diskriminerung (%)") +
-  #   scale_fill_hue(
-  #     name = key,
-  #     breaks = c(value1, value2),
-  #     labels = c(value1, value2)) +
-  #   scale_y_continuous(breaks = 0:20 * 4) +
-  #   theme_bw()
 }
 
-do_it_all("geschlecht", "männlich", "weiblich")
+calculate_separate_models("geschlecht", "männlich", "weiblich")
 ```
 
 #### Diskriminierung nach Organisationsform
@@ -869,23 +764,15 @@ Ergebnis:
 print("Modell with interaction term:")
 models = sapply(flats_both_list, calculate_regression, var_interact = "orga", vars_exclude = NULL)
 
-do_it_all("orga", "company", "private")
+calculate_separate_models("orga", "company", "private")
 ```
 
 Auch hier bestätigen die Modelle die Ergebnisse der deskriptiven Auswertung.
 
-<!-- #### Diskriminierung nach Geografie -->
-
-
-<!-- ```{r compare-geography} -->
-
-<!-- plot_discr_per_group("geography", "west", "ost", nats_f_long) -->
-<!-- ``` -->
-
-<!-- - **Polnische Bewerber werden in Westdeutschland stärker diskriminiert als in Ostdeutschland (inkl. Berlin).** Bei den übrigen Nationalitäten ist der Unterschied zwischen West und Ost deutlich geringer und statistisch nicht signifikant. -->
-
 
 ####**Anteil positiver Rückmeldungen**
+Neben dem Ausmaß der Diskriminierung betrachten wir ebenfalls, wie häufig einzelne Personen oder Gruppen positive Antworten erhalten haben. Und zwar relativ zur Gesamtzahl der gestellten Anfragen: `p = positive_antworten / anfragen`
+
 Betrachtet man nur den Anteil an Anfragen, auf die die jeweilige Person zu einem Besichtigungstermin eingeladen wurde oder einen solchen in Aussicht gestellt bekam, zeigt sich folgendes Bild:
 
 ```{r positive_per_person}
@@ -938,21 +825,22 @@ ggplot(share_positive_per_person) +
 
 - **Die Rücklaufquoten der einzelnen Personas bestätigen die Versuchsanordnung.**
 - Dr. Carsten Meier bekommt anteilig die meisten positiven Antworten, Lovis Kuhn landet im hinteren Drittel. Dass er trotz eines laxen Anschreibens ähnlich oder besser als die ausländischen männlichen Bewerber abschneidet, unterstreicht das Ausmaß der Diskriminierung am Mietmarkt. 
-- Interessant ist Daniel Buschle, der im Vergleich zu den anderen deutschen Profilen deutlich abfällt. Das könnte an einer negativen Konnotation seines Namens liegen.
+- Interessant ist Daniel Buschle, der im Vergleich zu den anderen deutschen Profilen abfällt. Das könnte an einer negativen Konnotation seines Namens liegen.
 
-Es gibt unterschiedliche Typen von Vermietern. Während manche Massenbesichtigungen durchführen, laden andere nur wenige Bewerber zu einem Treffen vor Ort ein. Da wir im weiteren Verlauf alle Anfragen einer Personengruppe einfließen lassen, rechnen wir erneut eine logistische Regression mit einen Zufallsfaktor je angeschriebener Wohnung. Dieser modelliert das unterschiedliche Antwortverhalten verschiedener Vermieter. Im Unterschied zu den Diskriminierungsraten verwenden wir für die weiteren Kennzahlen die Ergebnisse aus den Modellen auch in der Berichterstattung.
+Es gibt unterschiedliche Typen von Vermietern. Während manche Massenbesichtigungen durchführen, laden andere nur wenige Bewerber zu einem Treffen vor Ort ein. Da wir im weiteren Verlauf alle Anfragen einer Personengruppe einfließen lassen, rechnen wir erneut eine logistische Regression mit einen Zufallsfaktor je angeschriebener Wohnung. Dieser modelliert das unterschiedliche Antwortverhalten verschiedener Vermieter. Im Unterschied zu den Diskriminierungsraten verwenden wir für die weiteren Kennzahlen die Ergebnisse aus den Modellen auch direkt in der Berichterstattung.
 
 #### Positive Rückmeldungen nach Geschlecht
 
-Hier führen wir eine logistische Regression durch, die alle uns zur Verfügung stehenden Variablen kontrolliert:
+Hier führen wir eine logistische Regression durch, in der wir alle uns zur Verfügung stehenden Variablen kontrollieren:
 
 `positive ~ nat + geschlecht + orga + city + run + position_normal + (1 | link)`
 
-Unser Ziel ist es den Effekt, den das Geschlecht auf die Wahrscheinlichkeit einer positiven Rückmeldung hat, ungestört von anderen Faktoren darzustellen. Die Differenz der vorhergesagten Wahrscheinlichkeiten auf eine positive Rückmeldung für Männer und Frauen, entspricht annähernd exakt den AMEs aus dem Regressionsmodell.
+Unser Ziel ist es den Effekt, den das Geschlecht auf die Wahrscheinlichkeit einer positiven Rückmeldung hat, separiert vom Einfluss anderer Faktoren darzustellen. Die Differenz der vorhergesagten Wahrscheinlichkeiten auf eine positive Rückmeldung für Frauen und Männer, entspricht den AMEs aus dem Regressionsmodell (annähernd exakt).
 
 
 ```{r positive_per_gender, fig.height=2}
 
+# exclude requests from persons with extreme profile and duplicate-requests
 dat = confirmations_meta %>%
   filter(duplicate != TRUE) %>%
   filter(profile_type == "normal") %>%
@@ -1007,6 +895,7 @@ predict_probabilities = function(model, var_fixed, categories) {
 m <- glmer(positive ~ nat + geschlecht + orga + city + run + position_normal + (1 | link), data = dat, family = binomial(link=logit), control = glmerControl(optimizer = "bobyqa"), nAGQ = 10)
 
 predict_probabilities(m, "geschlecht", c("männlich", "weiblich"))
+glmermfx(m)
 ```
 
 
@@ -1014,7 +903,7 @@ predict_probabilities(m, "geschlecht", c("männlich", "weiblich"))
 
 #### Positive Rückmeldungen nach Organisationsform
 
-Hier ist das Vorgehen analog zur Auswertung nach Geschlecht.
+Hier ist das Vorgehen analog zur Auswertung nach Geschlecht. Wir verwenden das gleiche Modell wie oben. 
 
 ```{r positive_by_landlord, fig.height=2}
 
@@ -1027,11 +916,11 @@ predict_probabilities(m, "orga", c("company", "private"))
 
 #### Positive Rückmeldungen nach Stadt
 
-Auch hier ist das Vorgehen analog zur Auswertung nach Geschlecht. Einziger Unterschied ist, dass wir im Modell hier nicht die Organisationsform der Vermieter kontrollieren: 
+Auch hier ist das Vorgehen analog zur Auswertung nach Geschlecht. Einziger Unterschied ist, dass wir hier ein Modell rechenen, das nicht die Organisationsform der Vermieter kontrolliert: 
 
 `positive ~ nat + geschlecht + city + run + position_normal + (1 | link)`
 
-Wir gehen nämlich davon aus, dass die Verteilung von privaten und gewerblichen Wohnungsanbietern zwischen den Städten unterschiedlich ist und wir diese in unserer Erhebung entsprechend erfasst haben.
+Wir gehen nämlich davon aus, dass die Verteilung von privaten und gewerblichen Wohnungsanbietern zwischen den Städten unterschiedlich ist und wir diese in unserem Experiment entsprechend erfasst haben. Diese Unterschiede möchten wir in die Auswertung einfließen lassen.
 
 
 ```{r positive_by_city, fig.height=3}
@@ -1039,7 +928,9 @@ Wir gehen nämlich davon aus, dass die Verteilung von privaten und gewerblichen 
 cities = c("_münchen", "dresden", "dortmund", "magdeburg", "köln", "leipzig", "frankfurt", "nürnberg", "hamburg", "berlin")
 
 m_without_orga <- glmer(positive ~ nat + geschlecht + city + run + position_normal + (1 | link), data = dat, family = binomial(link=logit), control = glmerControl(optimizer = "bobyqa"), nAGQ = 10)
+
 predict_probabilities(m_without_orga, "city", cities)
+glmermfx(m_without_orga)
 ```
 
 - **Die Quote positiver Rückmeldungen unterscheidet sich stark je Stadt. Die deutlich niedrigste Quote weist München auf.** In Berlin und auch in Hamburg erhalten die Bewerber vergleichsweise viele Rückmeldungen.
@@ -1047,7 +938,7 @@ predict_probabilities(m_without_orga, "city", cities)
 
 ####**Chancenverhältnisse**
 
-Die Chance auf eine positive Rückmeldung ergibt sich aus dem Anteil der positiven Rückmeldungen (p) wie folgt:
+Ein Regressionsmodell bildet auch die Grundlage für die Berechnung des Chancenverhältnisses zwischen Deutschen und Bewerbern mit ausländischen Namen. Die Chance auf eine positive Rückmeldung ergibt sich aus dem Anteil der positiven Rückmeldungen (p) wie folgt:
 
 `chance = p / (1 - p)`
 
@@ -1057,11 +948,11 @@ Das Chancenverhältnis (r) zwischen ausländischen und deutschen Bewerbern ist s
 
 Es bildet ab, wie schwer es Personen mit ausländischem Namen im Vergleich zu deutschen Bewerbern auf dem Wohnungsmarkt haben. Das Chancenverhältnis ermöglicht es, die vier ausländischen Gruppen zusammenzufassen und Aussagen auf Stadtebene zu treffen. 
 
-Aus den gleichen Gründen wie oben, verwenden wir in der Berichterstattung auch hier die Ergebnisse aus der logistischen Regression. Wir rechnen hier ein Modell, in dem ein Interaktionseffekt zwischen der Stadt und der Frage ob ein zugeschriebener Migrationshintergrund vorliegt:
+Aus den gleichen Gründen wie oben, verwenden wir in der Berichterstattung auch hier die Ergebnisse aus der logistischen Regression. Wir rechnen hier ein Modell, in dem eine Interaktion zwischen der Stadt und dem zugeschriebenen Migrationshintergrund eines Bewerbers explizit modelliert wird. 
 
 `positive ~ hintergrund * city + geschlecht + run + position_normal + (1 | link)`
 
-Denn genau das ist ja die Grundannahme, für diese Metrik.
+Genau das ist ja die Annahme, die dieser Metrik zugrunde liegt. Als Ergebnis erhalten wir folgendes Balkendiagramm:
 
 
 ```{r odds_german_foreign_city}
@@ -1118,7 +1009,7 @@ ggplot(OR_per_city) +
   labs(subtitle = "Lesebeispiel: In München sind die Chancen auf eine positive Rückmeldung für einen ausländischen Bewerber beinahe um die\n Hälfte niedriger als die einer deutschen Person", x = "", y = "Chancenminus (%)")
 ```
 
-- **In München haben ausländische Bewerber gegenüber deutschen deutlich geringere Chancen eine positive Rückmeldung zu erhalten als in den übrigen Städten.** Mit einigem Abstand folgt Frankfurt an zweiter Stelle. In Dortmund und den ostdeutschen Städten Magdeburg und Leipzig ist der Chancenunterschied hingegen am geringsten. Aufgrund teilweise niedriger Fallzahlen sind kleine Unterschiede zwischen den Städten nur vorsichtig zu interpretieren.
+- **In München haben ausländische Bewerber gegenüber deutschen deutlich geringere Chancen eine positive Rückmeldung zu erhalten als in den übrigen Städten.** Mit einigem Abstand folgt Frankfurt an zweiter Stelle. In Dortmund und den ostdeutschen Städten Magdeburg und Leipzig ist der Chancenunterschied hingegen am geringsten. Aufgrund teils niedriger Fallzahlen sind kleinere Unterschiede zwischen den Städten und deren jeweilige Positionen gerade im mittleren Bereich nur sehr vorsichtig zu interpretieren.
 
 ### Ansprechpartner
 <div class="col2">
