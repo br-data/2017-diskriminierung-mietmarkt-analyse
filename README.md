@@ -7,7 +7,7 @@ Enthält eine Dokumentation der Methodik unseres Experiments zur Diskriminierung
 1. Repository klonen `git clone https://...`
 2. `analyse.Rmd` in RStudio öffnen
 3. Code-Chunks ausführen
-4. `analyse.nb.html` enthält eine [HTML-Version](https://br-data.github.io/hanna-und-ismail/analyse.nb.html) des gesamten Prozesses
+4. `analyse.nb.html` enthält eine [HTML-Version](https://br-data.github.io/diskriminierung-mietmarkt-analyse/analyse.nb.html) des gesamten Prozesses
 
 ## Datenquelle
 Im Juni und September 2016 haben wir uns in einem automatisierten Prozess auf 6798 Wohnungsannoncen in Berlin, Leipzig, München, Magdeburg, Dortmund, Köln, Nürnberg, Frankfurt, Dresden, Hamburg beworben. Die Absender der 20728 E-Mail-Anfragen unterschieden sich lediglich im Namen, der auf einen deutschen, arabischen, türkischen, italienischen oder polnischen Hintergrund schließen lässt. In ihren sonstigen Eigenschaften waren die Personen identisch – zwischen 20 und 30 Jahre alt, Berufseinsteiger in einer Agentur, mit Anschreiben in perfektem Deutsch. Männer und Frauen waren gleich häufig vertreten.
